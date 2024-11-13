@@ -41,7 +41,6 @@ router.post('/', async (req, res) => {
         req.session.isLoggedIn = true;
 
         res.cookie('sessionId', req.session.id, { httpOnly: true });
-
         res.json({ msg: 'Login successful!' });
     } catch (error) {
         console.error('Error during login:', error);

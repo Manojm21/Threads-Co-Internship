@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
 import 'bootswatch/dist/lux/bootstrap.min.css';
-import rvceLogo from '../assets/rvce.logo.png';
-import teamLogo from '../assets/rvce.write.png';
+import tcLogo from '../assets/Threads And Co.png';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ const Login = () => {
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
       {/* Left Logo */}
-      <img src={rvceLogo} alt="RVCE Logo" style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }} />
+      <img src={tcLogo} alt="TC Logo" style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }} />
       
       <div className="card p-4 shadow" style={{ maxWidth: '500px', width: '100%' }}>
         <h2 className="text-center mb-4">Login</h2>
@@ -72,8 +72,7 @@ const Login = () => {
         </form>
       </div>
 
-      {/* Right Logo */}
-      <img src={teamLogo} alt="Team Logo" style={{ position: 'absolute', top: '10px', right: '10px', width: '200px' }} />
+      
     </div>
   );
 };
