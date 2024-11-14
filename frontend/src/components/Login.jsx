@@ -1,25 +1,30 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import axios from 'axios';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import tcLogo from '../assets/Threads And Co.png';
-
+import AuthApi from '../utils/AuthApi';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const authApi = useContext(AuthApi);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
+    
     try {
       const response = await axios.post("http://localhost:3000/login", {
         email,
         password,
       });
       console.log(response.data.msg);
-      
-      window.location.href = '/view'; ////to be changed
+      authApi.setAuth(true);
+      navigate("/view") ////to be changed
     } catch (error) {
-      setError(error.response.data.msg);
+      // setError(error.response.data.msg);
+      console.log(error)
     }
   };
 
