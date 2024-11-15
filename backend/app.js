@@ -11,6 +11,7 @@ const port = 3000;
 const loginRoutes = require('./modules/login');
 const registerRouter = require('./modules/register');
 const logoutRouter = require('./modules/logout');
+const employeesRouter = require('./modules/employees');
 
 // Middleware setup
 app.use(express.json());
@@ -30,6 +31,7 @@ app.get('/', (req, res) => {
 app.use('/login', loginRoutes);
 app.use('/register', registerRouter);
 app.use('/logout', logoutRouter);
+app.use('/employees', employeesRouter);
 
 // Start the server
 app.listen(port, () => {
