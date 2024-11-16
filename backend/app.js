@@ -13,6 +13,7 @@ const registerRouter = require('./modules/register');
 const logoutRouter = require('./modules/logout');
 const employeesRouter = require('./modules/employees');
 const dashboardRouter = require('./modules/dashboard');
+const stockRouter = require('./modules/stock');
 
 // Middleware setup
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use('/register', registerRouter);
 app.use('/logout', logoutRouter);
 app.use('/employees', employeesRouter);
 app.use('/dashboard',dashboardRouter);
+app.use('/stock', stockRouter);
 
 // Start the server
 app.listen(port, () => {
