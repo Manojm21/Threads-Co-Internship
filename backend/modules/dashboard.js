@@ -2,10 +2,14 @@ const express = require('express')
 const router = express.Router()
 const db = require('./db')
 const joi = require('joi')
+
+//Schema for checking the request body of the attendance endpoint
 const schema = joi.object({
     employee_id: joi.number().integer().required(),
     status: joi.string().valid('Present', 'Absent', 'Holiday', 'On Leave').required()
 })
+
+
 router.use(express.json());
 
 router.get('/attendance/:id/:month', async (req, res) => {
@@ -34,6 +38,7 @@ router.get('/attendance/:id/:month', async (req, res) => {
         })
     }
 })
+
 router.post('/attendance', async (req, res) => {
     try {
         const { err } = schema.validate(req.body)
@@ -50,6 +55,7 @@ router.post('/attendance', async (req, res) => {
         const day = String(today.getDate()).padStart(2, '0');
 
         const formattedDate = `${year}-${month}-${day}`;
+        
         const values = [req.body.employee_id, formattedDate, req.body.status]
         const query = 'INSERT INTO Attendance(employee_id,date,status) VALUES(?,?,?)'
         await db.promise().query(query, values);
@@ -95,7 +101,7 @@ router.get('/salary/:id/:month', async (req, res) => {
     }
     else {
         const netSalary = sal - (sal / (pdn + adn + odn)) * adn;
-        res.status(201).json({ payableSalary: netSalary });
+        res.status(201).json({ payableSalary: netSalary.toFixed(2) });
     }
 
 })
