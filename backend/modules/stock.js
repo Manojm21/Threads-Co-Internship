@@ -62,22 +62,44 @@ router.delete('/:id', async (req, res) => {
         const itemID = req.params.id;
 
         //Validating the itemID to be an integer
-        if(!/^\d+$/.test(itemID)){
-            return res.status(400).json({msg: "Invalid item ID"});
+        if (!/^\d+$/.test(itemID)) {
+            return res.status(400).json({ msg: "Invalid item ID" });
         }
 
         const [result] = await db.promise().query(`DELETE FROM Stock WHERE id=?`, [itemID]);
 
-        if(result.affectedRows===0){
-            return res.status(404).json({msg: "item not found in stock"});
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ msg: "item not found in stock" });
         }
 
-        res.status(200).json({msg: `Successfully deleted the item with id: ${itemID}`});
+        res.status(200).json({ msg: `Successfully deleted the item with id: ${itemID}` });
     }
     catch (error) {
         console.log("Error deleting the item:", error);
-        res.status(500).json({msg: "Internal Server Error"});
+        res.status(500).json({ msg: "Internal Server Error" });
     }
 });
-
+//to increase or decrease the stock value...
+router.put('/:id/:flag/:qty', async (req, res) => {
+    try {
+        const [currb] = await db.promise().query('SELECT balance_quantity FROM Stock WHERE id=?', [req.params.id]);
+        const [currt] = await db.promise().query('SELECT total_quantity FROM Stock WHERE id=?', [req.params.id]);
+        query = 'UPDATE Stock SET balance_quantity=?,total_quantity=? WHERE id=?';
+        if (req.params.flag=='1') {
+            await db.promise().query(query, [parseInt(req.params.qty) + parseInt(currb[0]['balance_quantity']), parseInt(req.params.qty) + parseInt(currt[0]['total_quantity']), req.params.id]);
+        }
+        else {
+            if (parseInt(currb[0]['balance_quantity']) - parseInt(req.params.qty) > 0)
+                await db.promise().query(query, [parseInt(currb[0]['balance_quantity']) - parseInt(req.params.qty), parseInt(currt[0]['total_quantity']), req.params.id]);
+            else
+                res.status(400).json({ msg: "the inventory does not have the given nos units" });
+        }
+        res.status(200).json({msg:"Successfully upadated"})
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({msg:"error found while connecting to database"});
+    }
+});
 module.exports = router;
