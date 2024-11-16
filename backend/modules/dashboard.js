@@ -50,7 +50,7 @@ router.post('/attendance', async (req, res) => {
         const day = String(today.getDate()).padStart(2, '0');
 
         const formattedDate = `${year}-${month}-${day}`;
-        const values = [req.body.employee_id, formattedDate, req.body.status]
+        const values = [req.body.employee_id, formattedDate, req.bodystatus]
         const query = 'INSERT INTO Attendance(employee_id,date,status) VALUES(?,?,?)'
         await db.promise().query(query, values);
         res.status(201).json({
