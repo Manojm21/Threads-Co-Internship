@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CONFIG from './config'; // Import the configuration file
+import CONFIG from '../config'; // Import the configuration file
 
 const Stock = () => {
   const [items, setItems] = useState([]);
@@ -18,15 +18,22 @@ const Stock = () => {
     qty: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Fetch stock items from the backend
   useEffect(() => {
     const fetchItems = async () => {
+      setLoading(true);
+      setError('');
       try {
         const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-        setItems(response.data);
+        const data = Array.isArray(response.data) ? response.data : [];
+        setItems(data);
       } catch (err) {
-        setError('Failed to fetch items');
+        setError('Failed to fetch items. Please try again later.');
+        setItems([]); // Ensure `items` is always an array
+      } finally {
+        setLoading(false);
       }
     };
     fetchItems();
@@ -35,7 +42,14 @@ const Stock = () => {
   // Handle adding a new stock item
   const handleAddItem = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
+      if (parseInt(newItem.total_quantity) < parseInt(newItem.balance_quantity)) {
+        setError('Balance quantity cannot exceed total quantity.');
+        return;
+      }
+
       await axios.post(`${CONFIG.BACKEND_URL}/stock`, newItem);
       setNewItem({
         id: '',
@@ -47,35 +61,56 @@ const Stock = () => {
       });
       // Refresh the list after adding a new item
       const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-      setItems(response.data);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setItems(data);
     } catch (err) {
-      setError('Failed to add item');
+      setError('Failed to add item. Please check the inputs.');
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle deleting a stock item
   const handleDeleteItem = async (id) => {
+    setError('');
+    setLoading(true);
     try {
       await axios.delete(`${CONFIG.BACKEND_URL}/stock/${id}`);
-      // Refresh the list after deleting an item
-      const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-      setItems(response.data);
+      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
     } catch (err) {
-      setError('Failed to delete item');
+      setError('Failed to delete item. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle updating the stock quantity
   const handleUpdateQuantity = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
+      const item = items.find((item) => item.id === quantityChange.id);
+      if (!item) {
+        setError('Item not found.');
+        return;
+      }
+
+      if (quantityChange.flag === '0' && parseInt(quantityChange.qty) > parseInt(item.balance_quantity)) {
+        setError('Cannot decrease by more than the available balance quantity.');
+        return;
+      }
+
       await axios.put(`${CONFIG.BACKEND_URL}/stock/${quantityChange.id}/${quantityChange.flag}/${quantityChange.qty}`);
       setQuantityChange({ id: '', flag: '', qty: '' });
       // Refresh the list after updating stock
       const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-      setItems(response.data);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setItems(data);
     } catch (err) {
-      setError('Failed to update stock');
+      setError('Failed to update stock. Please check the inputs.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,6 +118,7 @@ const Stock = () => {
     <div>
       <h1>Stock Management</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <p>Loading...</p>}
 
       <div>
         <h2>Add New Item</h2>

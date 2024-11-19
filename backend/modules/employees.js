@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
@@ -61,6 +62,35 @@ router.post('/', async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
+
+// Route to update salary for an employee
+router.put('/:id', async (req, res) => {
+    try {
+      const { salary } = req.body;
+      const employeeId = req.params.id;
+  
+      // Validate salary
+      if (isNaN(salary) || salary <= 0) {
+        return res.status(400).json({ msg: 'Invalid salary value' });
+      }
+  
+      // Update salary in the database
+      const [result] = await db.promise().query(
+        `UPDATE Employees SET salary = ? WHERE employee_id = ?`,
+        [salary, employeeId]
+      );
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ msg: 'Employee not found' });
+      }
+  
+      res.status(200).json({ msg: 'Salary updated successfully' });
+    } catch (error) {
+      console.error('Error updating salary:', error);
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
+  });
+  
 
 //Delete the employee from the db based on the id
 router.delete('/:id', async (req, res) => {
