@@ -4,6 +4,7 @@ import 'bootswatch/dist/lux/bootstrap.min.css';
 import tcLogo from '../assets/Threads And Co.png';
 import AuthApi from '../utils/AuthApi';
 import { useNavigate } from 'react-router-dom';
+import CONFIG from '../config'; // Import configuration file
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,26 +14,29 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    
     try {
-      const response = await axios.post("http://localhost:10423/login", {
+      const response = await axios.post(`${CONFIG.BACKEND_URL}/login`, {
         email,
         password,
       });
       console.log(response.data.msg);
       authApi.setAuth(true);
-      navigate("/view") ////to be changed
+      navigate("/view"); // Navigate to the specified route
     } catch (error) {
-      // setError(error.response.data.msg);
-      console.log(error)
+      // Handle the error gracefully
+      console.log(error);
     }
   };
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
       {/* Left Logo */}
-      <img src={tcLogo} alt="TC Logo" style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }} />
-      
+      <img
+        src={tcLogo}
+        alt="TC Logo"
+        style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }}
+      />
+
       <div className="card p-4 shadow" style={{ maxWidth: '500px', width: '100%' }}>
         <h2 className="text-center mb-4">Login</h2>
         <form>
@@ -76,8 +80,6 @@ const Login = () => {
           )}
         </form>
       </div>
-
-      
     </div>
   );
 };
