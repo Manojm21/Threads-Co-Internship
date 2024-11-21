@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Dashboard from './components/Dashboard';
 import Login from './components/Login'
 import Register from './components/Register'
-import Stock from './components/Stock';
+import Stock from './components/Stocks';
 import Employees from './components/Employees'; 
+import Salary from './components/Salary';
+import Attendance from './components/Attendance'
 import AuthApi from './utils/AuthApi';
 import { useContext, useState } from 'react';
 import LandingPage from './components/LandingPage';
@@ -22,7 +24,8 @@ const App = () => {
             <Route path="/view" element={<RouteProtection><LandingPage /></RouteProtection>} />
             <Route path="/stock" element={<RouteProtection><Stock /></RouteProtection>} />
             <Route path="/employees" element={<RouteProtection><Employees /></RouteProtection>} />
-            {/* <Route path="/dashboard" element={<RouteProtection><Dashboard /></RouteProtection>} /> */}
+            <Route path="/attendance" element={<RouteProtection><Attendance /></RouteProtection>} />
+            <Route path="/salary" element={<RouteProtection><Salary /></RouteProtection>} />
             <Route path="/" element={<Dashboard/>} />
 
           </Routes>

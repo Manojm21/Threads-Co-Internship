@@ -12,7 +12,8 @@ const loginRoutes = require('./modules/login');
 const registerRouter = require('./modules/register');
 const logoutRouter = require('./modules/logout');
 const employeesRouter = require('./modules/employees');
-const dashboardRouter = require('./modules/dashboard');
+const attendanceRouter = require('./modules/attendance');
+const salaryRouter = require('./modules/salary');
 const stockRouter = require('./modules/stock');
 
 // Middleware setup
@@ -34,7 +35,8 @@ app.use('/login', loginRoutes);
 app.use('/register', registerRouter);
 app.use('/logout', logoutRouter);
 app.use('/employees', employeesRouter);
-app.use('/dashboard',dashboardRouter);
+app.use('/attendance', attendanceRouter);
+app.use('/salary',salaryRouter);
 app.use('/stock', stockRouter);
 
 // Start the server
