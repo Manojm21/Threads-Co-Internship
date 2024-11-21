@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Dashboard from './components/Dashboard';
 import Login from './components/Login'
 import Register from './components/Register'
+import Stock from './components/Stock';
+import Employees from './components/Employees'; 
 import AuthApi from './utils/AuthApi';
 import { useContext, useState } from 'react';
 import LandingPage from './components/LandingPage';
@@ -18,6 +20,8 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/view" element={<RouteProtection><LandingPage /></RouteProtection>} />
+            <Route path="/stock" element={<RouteProtection><Stock /></RouteProtection>} />
+            <Route path="/employees" element={<RouteProtection><Employees /></RouteProtection>} />
             <Route path="/" element={<Dashboard/>} />
 
           </Routes>

@@ -5,7 +5,7 @@ const session = require('express-session');
 
 const db = require('./modules/db');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 10423;
 
 //Import route
 const loginRoutes = require('./modules/login');
