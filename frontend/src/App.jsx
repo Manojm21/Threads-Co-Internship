@@ -5,7 +5,6 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Stock from './components/Stocks';
 import Employees from './components/Employees'; 
-import Salary from './components/Salary';
 import Attendance from './components/Attendance'
 import AuthApi from './utils/AuthApi';
 import { useContext, useState } from 'react';
@@ -25,7 +24,6 @@ const App = () => {
             <Route path="/stock" element={<RouteProtection><Stock /></RouteProtection>} />
             <Route path="/employees" element={<RouteProtection><Employees /></RouteProtection>} />
             <Route path="/attendance" element={<RouteProtection><Attendance /></RouteProtection>} />
-            <Route path="/salary" element={<RouteProtection><Salary /></RouteProtection>} />
             <Route path="/" element={<Dashboard/>} />
 
           </Routes>
