@@ -13,6 +13,21 @@ const Login = () => {
   const authApi = useContext(AuthApi);
   const navigate = useNavigate();
 
+  // const handleLogin = async () => {
+  //   try {
+  //     const response = await axios.post(`${CONFIG.BACKEND_URL}/login`, {
+  //       email,
+  //       password,
+  //     });
+  //     console.log(response.data.msg);
+  //     authApi.setAuth(true);
+  //     navigate("/view"); // Navigate to the specified route
+  //   } catch (error) {
+  //     // Handle the error gracefully
+  //     console.log(error);
+  //   }
+  // };
+
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${CONFIG.BACKEND_URL}/login`, {
@@ -23,10 +38,16 @@ const Login = () => {
       authApi.setAuth(true);
       navigate("/view"); // Navigate to the specified route
     } catch (error) {
-      // Handle the error gracefully
+      // Update the error state with an appropriate message
+      if (error.response && error.response.data && error.response.data.msg) {
+        setError(error.response.data.msg); // Use error message from backend response
+      } else {
+        setError('Login failed. Please check your credentials and try again.');
+      }
       console.log(error);
     }
   };
+  
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
