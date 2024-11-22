@@ -26,9 +26,11 @@ app.use(session({
 }));
 
 
+
+
 // Route handlers
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    res.send('hello world');
 });
 
 app.use('/login', loginRoutes);
