@@ -1,25 +1,33 @@
-# Stock Management API Documentation
+/stock - get
+[
+    {
+        "id": 1,
+        "name": "saree",
+        "colour": "red",
+        "total_quantity": 101,
+        "balance_quantity": 75,
+        "Rack_no": "A1"
+    },
+    {
+        "id": 2,
+        "name": "Shirt",
+        "colour": "Blue",
+        "total_quantity": 100,
+        "balance_quantity": 35,
+        "Rack_no": "S1"
+    }
+]
 
-## Base URL
-All endpoints are prefixed with `/stock`.
 
----
-
-### Add a New Stock Item
-**Endpoint:** `POST /`  
-**Description:** Adds a new stock item to the database.
-
-#### Request Body
-```json
+/stock - post AND put
 {
     "id": 1,
-    "name": "Item Name",
-    "colour": "Red",
-    "total_quantity": 100,
-    "balance_quantity": 50,
+    "name": "saree",
+    "colour": "red",
+    "total_quantity": 101,
+    "balance_quantity": 75,
     "Rack_no": "A1"
 }
-
 
 /employees - GET
 {
@@ -35,35 +43,80 @@ All endpoints are prefixed with `/stock`.
 }
 
 
-# Employee Management API Documentation
+/employees/:id - DELETE
+Send the id of the employee in the url to delete the employee
+Response --> {
+              msg: "Successfully deleted employee", 
+              empID: "<emp ID of the deleted employee>"
+            }
 
-## Base URL
-All endpoints are prefixed with `/employees`.
+POST /employees - Add a New Employee
 
----
+    Description: Adds a new employee to the database.
 
-### Get All Employees
-**Endpoint:** `GET /`  
-**Description:** Retrieves a list of all employees.
+    Request Type: POST
 
-#### Response
-- **200 OK**
-  ```json
-  [
-      {
-          "employee_id": 1,
-          "name": "John Doe",
-          "gender": "Male",
-          "phone_number": "1234567890",
-          "role": "Manager",
-          "address": "123 Street Name",
-          "aadhar_number": "123456789012",
-          "date_of_joining": "2023-01-01",
-          "salary": 50000.00
-      },
-      ...
-  ]
+    Request Body (JSON):
+        name: (string, required) Name of the employee.
+        gender: (string, required) Gender of the employee (Male, Female, Other).
+        phone_number: (string, required) Employee's phone number.
+        role: (string, required) Role of the employee.
+        address: (string, optional) Address of the employee.
+        aadhar_number: (string, required) Aadhar number of the employee.
+        date_of_joining: (date, required) Date the employee joined (format: YYYY-MM-DD).
+        salary: (number, required) Salary of the employee.
 
+    Responses:
+        201: Successfully added the employee.
+
+    Response JSON:
+        {
+        "msg": "Successfully added employee",
+        "empID": 1
+        }
+
+    400: Validation error.
+    Response JSON:
+        {
+        "msg": "Validation Error Message"
+        }
+    
+    500: Internal Server Error.
+
+
+PUT /employees/:id - Update an Employee's Salary
+
+    Description: Updates the salary of a specific employee.
+
+    Request Type: PUT
+
+    Parameters:
+        id: (integer, required) The ID of the employee whose salary is to be updated (passed in the URL).
+    
+    Request Body (JSON):
+        salary: (number, required) The new salary amount.
+
+    Responses:
+
+    200: Successfully updated the salary.
+    Response JSON:
+        {
+        "msg": "Salary updated successfully"
+        }
+
+    400: Invalid salary value provided.
+    Response JSON:
+        {
+        "msg": "Invalid salary value"
+        }
+
+    404: Employee not found.
+    Response JSON:
+        {
+        "msg": "Employee not found"
+        }
+    
+    500: Internal Server Error.
 
 #### **GET `/:id/:month` - Calculate Payable Salary for an Employee**
 
