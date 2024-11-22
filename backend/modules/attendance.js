@@ -12,6 +12,7 @@ const schema = joi.object({
 
 router.use(express.json());
 
+
 router.get('/:id/:month', async (req, res) => {
     try {
         const curr_month = req.params.month;
