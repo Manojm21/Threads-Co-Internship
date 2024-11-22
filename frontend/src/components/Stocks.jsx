@@ -1,234 +1,237 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CONFIG from '../config'; // Import the configuration file
+import { Button, Table, Modal, Form } from 'react-bootstrap';
+import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 
 const Stock = () => {
-  const [items, setItems] = useState([]);
+  const [stockData, setStockData] = useState([]);
+  const [show, setShow] = useState(false);
+  const [editItem, setEditItem] = useState(null); // Tracks item being edited
   const [newItem, setNewItem] = useState({
     id: '',
     name: '',
     colour: '',
-    total_quantity: '',
-    balance_quantity: '',
+    total_quantity: 0,
+    balance_quantity: 0,
     Rack_no: '',
   });
-  const [quantityChange, setQuantityChange] = useState({
-    id: '',
-    flag: '', // '1' for increase, '0' for decrease
-    qty: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Fetch stock items from the backend
+  // Fetch all stock items on component mount
   useEffect(() => {
-    const fetchItems = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-        const data = Array.isArray(response.data) ? response.data : [];
-        setItems(data);
-      } catch (err) {
-        setError('Failed to fetch items. Please try again later.');
-        setItems([]); // Ensure `items` is always an array
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
+    axios
+      .get(`${CONFIG.BACKEND_URL}/stock`)
+      .then((response) => setStockData(response.data))
+      .catch((error) => console.error('Error fetching stock data:', error));
   }, []);
 
-  // Handle adding a new stock item
-  const handleAddItem = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      if (parseInt(newItem.total_quantity) < parseInt(newItem.balance_quantity)) {
-        setError('Balance quantity cannot exceed total quantity.');
-        return;
-      }
+  // Add a new stock item
+  const handleAddItem = () => {
+    if (!newItem.id || !newItem.name || !newItem.colour || newItem.total_quantity <= 0) {
+      alert('Please fill in all fields correctly.');
+      return;
+    }
 
-      await axios.post(`${CONFIG.BACKEND_URL}/stock`, newItem);
+    axios
+      .post(`${CONFIG.BACKEND_URL}/stock`, newItem)
+      .then(() => {
+        setStockData([...stockData, newItem]); // Update state with the new item
+        setNewItem({
+          id: '',
+          name: '',
+          colour: '',
+          total_quantity: 0,
+          balance_quantity: 0,
+          Rack_no: '',
+        });
+        setShow(false);
+      })
+      .catch((error) => console.error('Error adding item:', error));
+  };
+
+  // Update an existing stock item
+  const handleEditItem = () => {
+    axios
+      .put(`${CONFIG.BACKEND_URL}/stock/${editItem.id}`, editItem)
+      .then(() => {
+        setStockData((prev) =>
+          prev.map((item) => (item.id === editItem.id ? { ...editItem } : item))
+        );
+        setShow(false);
+        setEditItem(null);
+      })
+      .catch((error) => console.error('Error updating item:', error));
+  };
+
+  // Delete a stock item
+  const handleDeleteItem = (id) => {
+    axios
+      .delete(`${CONFIG.BACKEND_URL}/stock/${id}`)
+      .then(() => {
+        setStockData(stockData.filter((item) => item.id !== id));
+      })
+      .catch((error) => console.error('Error deleting item:', error));
+  };
+
+  // Open modal for adding or editing stock
+  const handleShow = (item = null) => {
+    if (item) {
+      setEditItem(item); // Set the item to be edited
+    } else {
       setNewItem({
         id: '',
         name: '',
         colour: '',
-        total_quantity: '',
-        balance_quantity: '',
+        total_quantity: 0,
+        balance_quantity: 0,
         Rack_no: '',
       });
-      // Refresh the list after adding a new item
-      const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-      const data = Array.isArray(response.data) ? response.data : [];
-      setItems(data);
-    } catch (err) {
-      setError('Failed to add item. Please check the inputs.');
-    } finally {
-      setLoading(false);
     }
+    setShow(true);
   };
 
-  // Handle deleting a stock item
-  const handleDeleteItem = async (id) => {
-    setError('');
-    setLoading(true);
-    try {
-      await axios.delete(`${CONFIG.BACKEND_URL}/stock/${id}`);
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-    } catch (err) {
-      setError('Failed to delete item. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle updating the stock quantity
-  const handleUpdateQuantity = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const item = items.find((item) => item.id === quantityChange.id);
-      if (!item) {
-        setError('Item not found.');
-        return;
-      }
-
-      if (quantityChange.flag === '0' && parseInt(quantityChange.qty) > parseInt(item.balance_quantity)) {
-        setError('Cannot decrease by more than the available balance quantity.');
-        return;
-      }
-
-      await axios.put(`${CONFIG.BACKEND_URL}/stock/${quantityChange.id}/${quantityChange.flag}/${quantityChange.qty}`);
-      setQuantityChange({ id: '', flag: '', qty: '' });
-      // Refresh the list after updating stock
-      const response = await axios.get(`${CONFIG.BACKEND_URL}/stock`);
-      const data = Array.isArray(response.data) ? response.data : [];
-      setItems(data);
-    } catch (err) {
-      setError('Failed to update stock. Please check the inputs.');
-    } finally {
-      setLoading(false);
-    }
+  // Close modal
+  const handleClose = () => {
+    setShow(false);
+    setEditItem(null); // Clear edit state
   };
 
   return (
-    <div>
-      <h1>Stock Management</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {loading && <p>Loading...</p>}
-
-      <div>
-        <h2>Add New Item</h2>
-        <form onSubmit={handleAddItem}>
-          <input
-            type="number"
-            placeholder="ID"
-            value={newItem.id}
-            onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Name"
-            value={newItem.name}
-            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Colour"
-            value={newItem.colour}
-            onChange={(e) => setNewItem({ ...newItem, colour: e.target.value })}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Total Quantity"
-            value={newItem.total_quantity}
-            onChange={(e) => setNewItem({ ...newItem, total_quantity: e.target.value })}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Balance Quantity"
-            value={newItem.balance_quantity}
-            onChange={(e) => setNewItem({ ...newItem, balance_quantity: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Rack No"
-            value={newItem.Rack_no}
-            onChange={(e) => setNewItem({ ...newItem, Rack_no: e.target.value })}
-          />
-          <button type="submit">Add Item</button>
-        </form>
-      </div>
-
-      <div>
-        <h2>Update Stock Quantity</h2>
-        <form onSubmit={handleUpdateQuantity}>
-          <input
-            type="number"
-            placeholder="Item ID"
-            value={quantityChange.id}
-            onChange={(e) => setQuantityChange({ ...quantityChange, id: e.target.value })}
-            required
-          />
-          <select
-            value={quantityChange.flag}
-            onChange={(e) => setQuantityChange({ ...quantityChange, flag: e.target.value })}
-            required
-          >
-            <option value="">Select Operation</option>
-            <option value="1">Increase</option>
-            <option value="0">Decrease</option>
-          </select>
-          <input
-            type="number"
-            placeholder="Quantity"
-            value={quantityChange.qty}
-            onChange={(e) => setQuantityChange({ ...quantityChange, qty: e.target.value })}
-            required
-          />
-          <button type="submit">Update Quantity</button>
-        </form>
-      </div>
-
-      <div>
-        <h2>Stock Items</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Colour</th>
-              <th>Total Quantity</th>
-              <th>Balance Quantity</th>
-              <th>Rack No</th>
-              <th>Actions</th>
+    <div className="container mt-4">
+      <h1 className="text-center mb-4">Stock Management</h1>
+      <Button variant="primary" onClick={() => handleShow()}>
+        Add New Item
+      </Button>
+      <Table striped bordered hover className="mt-3">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Colour</th>
+            <th>Total Quantity</th>
+            <th>Balance Quantity</th>
+            <th>Rack No</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stockData.map((item) => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>{item.colour}</td>
+              <td>{item.total_quantity}</td>
+              <td>{item.balance_quantity}</td>
+              <td>{item.Rack_no}</td>
+              <td>
+                <Button variant="warning" onClick={() => handleShow(item)}>
+                  Edit
+                </Button>{' '}
+                <Button variant="danger" onClick={() => handleDeleteItem(item.id)}>
+                  Delete
+                </Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.name}</td>
-                <td>{item.colour}</td>
-                <td>{item.total_quantity}</td>
-                <td>{item.balance_quantity}</td>
-                <td>{item.Rack_no}</td>
-                <td>
-                  <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
+
+      {/* Modal for Add/Edit Item */}
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editItem ? 'Edit Item' : 'Add New Item'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="formId">
+              <Form.Label>Item ID</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter item ID"
+                value={editItem ? editItem.id : newItem.id}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, id: e.target.value })
+                    : setNewItem({ ...newItem, id: e.target.value })
+                }
+                disabled={!!editItem} // Disable ID field in edit mode
+              />
+            </Form.Group>
+            <Form.Group controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter item name"
+                value={editItem ? editItem.name : newItem.name}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, name: e.target.value })
+                    : setNewItem({ ...newItem, name: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="formColour">
+              <Form.Label>Colour</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter item colour"
+                value={editItem ? editItem.colour : newItem.colour}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, colour: e.target.value })
+                    : setNewItem({ ...newItem, colour: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="formTotalQuantity">
+              <Form.Label>Total Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter total quantity"
+                value={editItem ? editItem.total_quantity : newItem.total_quantity}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, total_quantity: e.target.value })
+                    : setNewItem({ ...newItem, total_quantity: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="formBalanceQuantity">
+              <Form.Label>Balance Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter balance quantity"
+                value={editItem ? editItem.balance_quantity : newItem.balance_quantity}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, balance_quantity: e.target.value })
+                    : setNewItem({ ...newItem, balance_quantity: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="formRackNo">
+              <Form.Label>Rack No</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter rack number"
+                value={editItem ? editItem.Rack_no : newItem.Rack_no}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, Rack_no: e.target.value })
+                    : setNewItem({ ...newItem, Rack_no: e.target.value })
+                }
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={editItem ? handleEditItem : handleAddItem}>
+            {editItem ? 'Update Item' : 'Add Item'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -17,13 +17,13 @@ const LandingPage = () => {
         <div className="vh-100  d-flex flex-column align-items-center">
             {/* Logout Button */}
             <div className="position-absolute top-0 end-0 m-4">
-                <button
-                    className="btn btn-danger px-4 py-2"
-                    onClick={handleLogout}
-                    style={{ fontSize: "16px", borderRadius: "8px" }}
-                >
-                    Logout
-                </button>
+            <button
+                className="btn btn-danger px-4 py-2"
+                onClick={handleLogout}
+                style={{ fontSize: "16px", borderRadius: "8px", marginTop: "60px" }}>
+                Logout
+            </button>
+
             </div>
 
             {/* Main Content */}

@@ -7,13 +7,17 @@ const Dashboard = () => {
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
       {/* Add the left logo */}
-      <div style={{ position: 'absolute', top: '15px', left: '15px' }}>
+      <div style={{ position: 'absolute', top: '80px', left: '15px' }}>
         <img src={image1} alt="TC logo" style={{ width: '130px' }} />
       </div>
       
+      {/* Add the right logo */}
+      <div style={{ position: 'absolute', top: '90px', right: '15px' }}>
+      <h2 className="text-center mb-4">Threads & Co.</h2> 
+      </div>
 
       {/* Add margin top for spacing */}
-      <h2 className="text-center mb-4">Threads & Co.</h2> {/* Center the text and add margin bottom */}
+      <h2 className="text-center mb-4">Welcome Admin</h2> {/* Center the text and add margin bottom */}
       <nav className="text-center">
         <Link to="/login" className="btn btn-primary me-2">
           Login

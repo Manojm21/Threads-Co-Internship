@@ -34,12 +34,16 @@ const Register = () => {
       <img
         src={tcLogo}
         alt="TC Logo"
-        style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }}
+        style={{ position: 'absolute', top: '70px', left: '10px', width: '130px' }}
       />
+
+      <div style={{ position: 'absolute', top: '90px', right: '15px' }}>
+      <h2 className="text-center mb-4">Threads & Co.</h2> 
+      </div>
 
       {/* Registration Form */}
       <div className="container d-flex justify-content-center align-items-center vh-100">
-        <div className="card p-4 shadow" style={{ maxWidth: '500px', width: '100%' }}>
+        <div className="card p-4 shadow" style={{ maxWidth: '400px', width: '100%' }}>
           <h2 className="text-center mb-4">Register</h2>
           <form>
             {/* Email Input */}

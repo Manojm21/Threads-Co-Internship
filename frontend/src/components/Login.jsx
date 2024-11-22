@@ -55,10 +55,10 @@ const Login = () => {
       <img
         src={tcLogo}
         alt="TC Logo"
-        style={{ position: 'absolute', top: '10px', left: '10px', width: '130px' }}
+        style={{ position: 'absolute', top: '70px', left: '10px', width: '120px' }}
       />
 
-      <div className="card p-4 shadow" style={{ maxWidth: '500px', width: '100%' }}>
+      <div className="card p-4 shadow" style={{ maxWidth: '400px', width: '100%' }}>
         <h2 className="text-center mb-4">Login</h2>
         <form>
           <div className="mb-3">
