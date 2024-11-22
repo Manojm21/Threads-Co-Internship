@@ -1,138 +1,125 @@
-import React, { useState, useEffect } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import axios from "axios";
-import "./Attendance.css"; // Add custom styling if needed
-import { Container, Row, Col, Button, ToggleButton, ButtonGroup } from "react-bootstrap";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Table, Container, Row, Col, Button, Form } from 'react-bootstrap';
+import 'bootswatch/dist/lux/bootstrap.min.css';
 
-const AttendanceApp = () => {
-  const [attendanceData, setAttendanceData] = useState({});
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentStatus, setCurrentStatus] = useState("");
-  const [loading, setLoading] = useState(false);
+const AllEmployeesAttendance = () => {
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [currentDate, setCurrentDate] = useState('');
+    const [month, setMonth] = useState(new Date().getMonth() + 1); // Default to current month
+    const [employeeSummary, setEmployeeSummary] = useState(null);
 
-  const employeeId = 1; // Example employee ID, you can dynamically set this
-  const currentMonth = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
+    // Fetch attendance data for all employees
+    const fetchAttendanceData = async (month) => {
+        try {
+            const response = await axios.get(`/attendance/all/${month}`);
+            setAttendanceData(response.data || []); // Ensure an empty array if data is null/undefined
+        } catch (error) {
+            console.error('Error fetching attendance data:', error);
+            setAttendanceData([]); // Reset to empty array on error
+        }
+    };
 
-  useEffect(() => {
-    fetchAttendance();
-  }, [selectedDate]);
+    // Fetch attendance summary for a specific employee
+    const fetchEmployeeSummary = async (employeeId) => {
+        try {
+            const response = await axios.get(`/attendance/${employeeId}/${month}`);
+            setEmployeeSummary({ ...response.data, employeeId });
+        } catch (error) {
+            console.error('Error fetching employee summary:', error);
+        }
+    };
 
-  const fetchAttendance = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `/attendance/${employeeId}/${currentMonth}`
-      );
-      setAttendanceData(data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching attendance data", error);
-      setLoading(false);
-    }
-  };
+    // Fetch attendance data on mount
+    useEffect(() => {
+        const today = new Date();
+        setCurrentDate(today.toDateString());
+        fetchAttendanceData(month);
+    }, [month]);
 
-  const handleStatusChange = (status) => {
-    setCurrentStatus(status);
-  };
+    return (
+        <Container className="mt-4">
+            {/* Header with Current Date */}
+            <Row>
+                <Col>
+                    <h5 style={{ textAlign: 'left' }}>
+                        <strong>Date:</strong> {currentDate}
+                    </h5>
+                </Col>
+                <Col>
+                    <Form.Control
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={month}
+                        onChange={(e) => setMonth(e.target.value)}
+                        placeholder="Enter month (1-12)"
+                    />
+                </Col>
+            </Row>
 
-  const submitAttendance = async () => {
-    try {
-      const today = new Date();
-      const formattedDate = `${today.getFullYear()}-${String(
-        today.getMonth() + 1
-      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+            {/* Attendance Table */}
+            <Row className="mt-4">
+                <Col>
+                    <h3>Attendance Summary for All Employees</h3>
+                    <Table bordered hover responsive>
+                        <thead className="thead-dark">
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>On Leave</th>
+                                <th>Holidays</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {attendanceData.length > 0 ? (
+                                attendanceData.map((employee) => (
+                                    <tr key={employee.employee_id}>
+                                        <td>{employee.employee_id}</td>
+                                        <td>{employee.present}</td>
+                                        <td>{employee.absent}</td>
+                                        <td>{employee.onleave}</td>
+                                        <td>{employee.holidays}</td>
+                                        <td>
+                                            <Button
+                                                variant="info"
+                                                onClick={() => fetchEmployeeSummary(employee.employee_id)}
+                                            >
+                                                View Summary
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: 'center' }}>
+                                        No data available for this month.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
 
-      await axios.post("/attendance", {
-        employee_id: employeeId,
-        status: currentStatus,
-      });
-
-      alert("Attendance marked successfully!");
-      fetchAttendance();
-    } catch (error) {
-      console.error("Error submitting attendance", error);
-      alert("Failed to submit attendance.");
-    }
-  };
-
-  const tileClassName = ({ date }) => {
-    if (!attendanceData || loading) return "";
-    const formattedDate = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-    if (formattedDate in attendanceData) {
-      switch (attendanceData[formattedDate]) {
-        case "Present":
-          return "present-day";
-        case "Absent":
-          return "absent-day";
-        case "On Leave":
-          return "on-leave-day";
-        default:
-          return "";
-      }
-    }
-  };
-
-  return (
-    <Container className="mt-4">
-      <Row>
-        <Col md={8}>
-          <h2 className="text-center">Attendance Calendar</h2>
-          <Calendar
-            onChange={setSelectedDate}
-            value={selectedDate}
-            tileClassName={tileClassName}
-          />
-        </Col>
-        <Col md={4}>
-          <h2 className="text-center">Mark Today's Attendance</h2>
-          <ButtonGroup className="d-flex justify-content-center mt-3">
-            <ToggleButton
-              type="radio"
-              variant="outline-success"
-              name="status"
-              value="Present"
-              checked={currentStatus === "Present"}
-              onChange={() => handleStatusChange("Present")}
-            >
-              Present
-            </ToggleButton>
-            <ToggleButton
-              type="radio"
-              variant="outline-danger"
-              name="status"
-              value="Absent"
-              checked={currentStatus === "Absent"}
-              onChange={() => handleStatusChange("Absent")}
-            >
-              Absent
-            </ToggleButton>
-            <ToggleButton
-              type="radio"
-              variant="outline-primary"
-              name="status"
-              value="On Leave"
-              checked={currentStatus === "On Leave"}
-              onChange={() => handleStatusChange("On Leave")}
-            >
-              On Leave
-            </ToggleButton>
-          </ButtonGroup>
-          <Button
-            className="mt-3 w-100"
-            variant="primary"
-            disabled={!currentStatus}
-            onClick={submitAttendance}
-          >
-            Submit
-          </Button>
-        </Col>
-      </Row>
-    </Container>
-  );
+            {/* Employee Summary */}
+            {employeeSummary && (
+                <Row className="mt-4">
+                    <Col>
+                        <h4>Attendance Summary for Employee ID: {employeeSummary.employeeId}</h4>
+                        <ul>
+                            <li>Present: {employeeSummary.present}</li>
+                            <li>Absent: {employeeSummary.absent}</li>
+                            <li>Holidays: {employeeSummary.holidays}</li>
+                            <li>On Leave: {employeeSummary.onleave}</li>
+                        </ul>
+                    </Col>
+                </Row>
+            )}
+        </Container>
+    );
 };
 
-export default AttendanceApp;
+export default AllEmployeesAttendance;
