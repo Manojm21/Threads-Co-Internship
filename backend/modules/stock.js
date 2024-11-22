@@ -9,7 +9,8 @@ const itemSchema = Joi.object({
     colour: Joi.string().max(100).required(),
     total_quantity: Joi.number().integer().required(),
     balance_quantity: Joi.number().integer().required(),
-    Rack_no: Joi.string().max(50)
+    Rack_no: Joi.string().max(50),
+    Size: Joi.string().max(10)
 })
 
 
@@ -28,12 +29,13 @@ router.post('/', async (req, res) => {
             colour,
             total_quantity,
             balance_quantity,
-            Rack_no
+            Rack_no,
+            Size
         } = value;
 
-        const [result] = await db.promise().query(`INSERT INTO Stock (id, name, colour, total_quantity, balance_quantity, Rack_no) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [id, name, colour, total_quantity, balance_quantity, Rack_no]);
+        const [result] = await db.promise().query(`INSERT INTO Stock (id, name, colour, total_quantity, balance_quantity, Rack_no, Size) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [id, name, colour, total_quantity, balance_quantity, Rack_no, Size]);
 
         res.status(201).json("Successfully added item")
     }

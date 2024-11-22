@@ -14,6 +14,7 @@ const Stock = () => {
     total_quantity: 0,
     balance_quantity: 0,
     Rack_no: '',
+    Size: ''
   });
 
   // Fetch all stock items on component mount
@@ -42,6 +43,7 @@ const Stock = () => {
           total_quantity: 0,
           balance_quantity: 0,
           Rack_no: '',
+          Size: ''
         });
         setShow(false);
       })
@@ -84,6 +86,7 @@ const Stock = () => {
         total_quantity: 0,
         balance_quantity: 0,
         Rack_no: '',
+        Size: ''
       });
     }
     setShow(true);
@@ -110,6 +113,7 @@ const Stock = () => {
             <th>Total Quantity</th>
             <th>Balance Quantity</th>
             <th>Rack No</th>
+            <th>Size</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -122,6 +126,7 @@ const Stock = () => {
               <td>{item.total_quantity}</td>
               <td>{item.balance_quantity}</td>
               <td>{item.Rack_no}</td>
+              <td>{item.Size}</td>
               <td>
                 <Button variant="warning" onClick={() => handleShow(item)}>
                   Edit
@@ -218,6 +223,19 @@ const Stock = () => {
                   editItem
                     ? setEditItem({ ...editItem, Rack_no: e.target.value })
                     : setNewItem({ ...newItem, Rack_no: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="formSize">
+              <Form.Label>Size</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter size of the item"
+                value={editItem ? editItem.Size : newItem.Size}
+                onChange={(e) =>
+                  editItem
+                    ? setEditItem({ ...editItem, Size: e.target.value })
+                    : setNewItem({ ...newItem, Size: e.target.value })
                 }
               />
             </Form.Group>
