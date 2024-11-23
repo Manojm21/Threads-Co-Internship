@@ -1,96 +1,98 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("./db");
-const joi = require("joi");
+const db = require('./db');
+const joi = require('joi');
 
 // Schema for validating attendance data
 const schema = joi.object({
   employee_id: joi.number().integer().required(),
-  status: joi.string().valid("Present", "Absent", "Holiday", "On Leave").required(),
+  status: joi.string().valid('Present', 'Absent', 'Holiday', 'On Leave').required(),
 });
 
 // Middleware to parse JSON
 router.use(express.json());
 
-// Route to get all employees and submit attendance for employees
-router.route("/")
+router.route('/')
   .get(async (req, res) => {
     try {
-      const [rows] = await db.promise().query("SELECT employee_id, name FROM Employees");
-      res.status(200).json(rows);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ msg: "Error fetching employee data" });
+      const today = new Date().toISOString().split('T')[0];
+
+      // Fetch employee data
+      const [employees] = await db.promise().query('SELECT employee_id, name FROM Employees');
+
+      // Check if today's attendance is recorded
+      const [attendance] = await db.promise().query(
+        'SELECT COUNT(*) AS count FROM Attendance WHERE date = ?',
+        [today]
+      );
+
+      const attendanceRecorded = attendance[0].count > 0;
+
+      res.status(200).json({ employees, attendanceRecorded });
+    } catch (error) {
+      console.error('Error fetching attendance data:', error);
+      res.status(500).json({ message: 'Error fetching attendance data' });
     }
   })
   .post(async (req, res) => {
     try {
-      const today = new Date();
-      const formattedDate = today.toISOString().split("T")[0];
-
+      const today = new Date().toISOString().split('T')[0];
       const attendanceData = req.body.attendance;
+
       const errors = [];
-      const query = "INSERT INTO Attendance(employee_id, date, status) VALUES (?, ?, ?)";
+      const query = 'INSERT INTO Attendance (employee_id, date, status) VALUES (?, ?, ?)';
 
       for (const record of attendanceData) {
-        // Validate each record using Joi
         const { error } = schema.validate(record);
         if (error) {
           errors.push({ employee_id: record.employee_id, error: error.message });
           continue;
         }
 
-        // Insert the valid record into the database
-        await db.promise().query(query, [record.employee_id, formattedDate, record.status]);
+        try {
+          await db.promise().query(query, [record.employee_id, today, record.status]);
+        } catch (err) {
+          if (err.code === 'ER_DUP_ENTRY') {
+            return res
+              .status(400)
+              .json({ message: 'Attendance already recorded for this employee today' });
+          }
+          throw err;
+        }
       }
 
       if (errors.length > 0) {
-        res.status(400).json({ msg: "Some records have validation errors", errors });
+        res.status(400).json({ message: 'Validation errors in some records', errors });
       } else {
-        res.status(201).json({ msg: "Attendance recorded successfully" });
+        res.status(201).json({ message: 'Attendance recorded successfully' });
       }
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ msg: "Error in updating the database" });
+    } catch (error) {
+      console.error('Error recording attendance:', error);
+      res.status(500).json({ message: 'Error recording attendance' });
     }
   });
 
-// Route to get attendance summary by month
 router.get('/:month', async (req, res) => {
   try {
     const month = req.params.month;
-
-    // Ensure `month` is a valid number
     if (isNaN(month) || month < 1 || month > 12) {
-      return res.status(400).json({ msg: "Invalid month parameter" });
+      return res.status(400).json({ message: 'Invalid month parameter' });
     }
 
     const query = `
-      SELECT employee_id, STATUS, COUNT(date) AS count
+      SELECT employee_id, status, COUNT(*) AS count
       FROM Attendance
       WHERE MONTH(date) = ?
-      GROUP BY employee_id, STATUS
-    `;
+      GROUP BY employee_id, status`;
 
     const [rows] = await db.promise().query(query, [month]);
 
-    // Initialize an object to hold the attendance summary for all employees
     const summary = {};
-
-    // Populate the summary with attendance data for each employee
-    rows.forEach(row => {
-      // Initialize the employee summary if it doesn't exist
+    rows.forEach((row) => {
       if (!summary[row.employee_id]) {
-        summary[row.employee_id] = {
-          present: 0,
-          absent: 0,
-          holidays: 0,
-          onleave: 0
-        };
+        summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, onleave: 0 };
       }
-
-      // Update the attendance count for each status
-      switch (row.STATUS.toLowerCase()) {
+      switch (row.status.toLowerCase()) {
         case 'present':
           summary[row.employee_id].present = row.count;
           break;
@@ -109,9 +111,9 @@ router.get('/:month', async (req, res) => {
     });
 
     res.status(200).json(summary);
-  } catch (err) {
-    console.error("Error fetching attendance summary:", err);
-    res.status(500).json({ msg: "Error fetching attendance summary" });
+  } catch (error) {
+    console.error('Error fetching attendance summary:', error);
+    res.status(500).json({ message: 'Error fetching attendance summary' });
   }
 });
 
