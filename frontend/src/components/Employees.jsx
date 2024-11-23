@@ -6,7 +6,7 @@ import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 
 const Employees = () => {
   const [ employees, setEmployees ] = useState([]);
-  const [ editemployee, setEditemployee ] = useState([]);
+  const [ editemployee, setEditemployee ] = useState(null);
   const [ show, setShow ] = useState(false);
   const [ newemployee, setNewEmployee ] = useState([]);
   useEffect(() => {
@@ -42,7 +42,7 @@ const Employees = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number||!newemployee.role||!newemployee.date_of_joining||!newemployee.salary||!newemployee.advance) {
+    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number ||!newemployee.role || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance) {
       alert('Please fill in all fields correctly.');
       return;
     }
@@ -61,19 +61,21 @@ const Employees = () => {
           salary: 0,
           advance: 0
         });
+        alert("Added Employee successfully")
         setShow(false);
       })
       .catch((error) => console.error('Error adding employee:', error));
   };
 
   const handleEditEmployee = () => {
-    console.log(editemployee)
+    console.log(editemployee.employee_id)
     axios
       .put(`${CONFIG.BACKEND_URL}/employees/${editemployee.employee_id}`, editemployee)
       .then(() => {
         setEmployees((prev) =>
           prev.map((item) => (item.employee_id === editemployee.employee_id ? { ...editemployee } : item))
         );
+        alert("Edited employee successfully");
         setShow(false);
         setEditemployee(null);
       })
@@ -85,6 +87,7 @@ const Employees = () => {
       .delete(`${CONFIG.BACKEND_URL}/employees/${id}`)
       .then(() => {
         setEmployees(employees.filter((item) => item.employee_id !== id));
+        alert("Deleted employee successfully")
       })
       .catch((error) => console.error('Error deleting Employee:', error));
   };
@@ -92,13 +95,13 @@ const Employees = () => {
 
   
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4 mb-4" >
       <h1 className="text-center mb-4">Employee Details</h1>
       <Button variant="primary" onClick={() => handleShow()}>
         Create Employee
       </Button>
       <Table striped bordered hover className="mt-3">
-        <thead>
+        <thead style={{top:'83px',position:'sticky',zIndex:'999'}}>
           <tr>
             <th>ID</th>
             <th>Name</th>
@@ -106,8 +109,9 @@ const Employees = () => {
             <th>Phone Number</th>
             <th>Role</th>
             <th>Date Of Joining</th>
-            <th>advance</th>
+            <th>Salary</th>
             <th>Advance</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -118,13 +122,14 @@ const Employees = () => {
               <td>{item.gender}</td>
               <td>{item.phone_number}</td>
               <td>{item.role}</td>
-              <td>{item.date_of_joining}</td>
+              <td>{item.date_of_joining.split('T')[0]}</td>
+              <td>{item.salary}</td>
               <td>{item.advance}</td>
               <td>
                 <Button variant="warning" onClick={() => handleShow(item)}>
                   Edit
                 </Button>{' '}
-                <Button variant="danger" onClick={() => handleDeleteEmployee(item.id)}>
+                <Button variant="danger" onClick={() => handleDeleteEmployee(item.employee_id)}>
                   Delete
                 </Button>
               </td>
@@ -145,11 +150,10 @@ const Employees = () => {
               <Form.Control
                 type="number"
                 placeholder="Enter Employee ID"
-                value={editemployee ? editemployee.employee_id : newemployee.id}
+                value={editemployee ? editemployee.employee_id : newemployee.employee_id}
                 onChange={(e) =>
-                  editemployee
-                    ? setEditemployee({ ...editemployee, id: e.target.value })
-                    : setNewEmployee({ ...newemployee, id: e.target.value })
+                  editemployee? setEditemployee({ ...editemployee, employee_id: e.target.value })
+                    : setNewEmployee({ ...newemployee, employee_id: e.target.value })
                 }
                 disabled={editemployee} // Disable ID field in edit mode
               />
@@ -219,6 +223,19 @@ const Employees = () => {
                 }
               />
             </Form.Group>
+            <Form.Group controlId='formSalary'>
+              <Form.Label>Salary</Form.Label>
+              <Form.Control 
+                type="number"
+                placeholder="Enter salary of the employee"
+                value={editemployee ? editemployee.salary : newemployee.salary}
+                onChange={(e) =>
+                  editemployee
+                    ? setEditemployee({ ...editemployee, salary: e.target.value })
+                    : setNewEmployee({ ...newemployee, salary: e.target.value })
+                }
+              />
+            </Form.Group>
             <Form.Group controlId='formAdvance'>
               <Form.Label>Advance</Form.Label>
               <Form.Control 
@@ -229,6 +246,32 @@ const Employees = () => {
                   editemployee
                     ? setEditemployee({ ...editemployee, advance: e.target.value })
                     : setNewEmployee({ ...newemployee, advance: e.target.value })
+                }
+              />
+              </Form.Group>
+              <Form.Group controlId='formAadhar'>
+              <Form.Label>Aadhar Number</Form.Label>
+              <Form.Control 
+                type="number"
+                placeholder="Enter aadhar number of the employee"
+                value={editemployee ? editemployee.aadhar_number : newemployee.aadhar_number}
+                onChange={(e) =>
+                  editemployee
+                    ? setEditemployee({ ...editemployee, aadhar_number: e.target.value })
+                    : setNewEmployee({ ...newemployee, aadhar_number: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId='formAddress'>
+              <Form.Label>Address</Form.Label>
+              <Form.Control 
+                type="text"
+                placeholder="Enter address of the employee"
+                value={editemployee ? editemployee.address : newemployee.address}
+                onChange={(e) =>
+                  editemployee
+                    ? setEditemployee({ ...editemployee, address: e.target.value })
+                    : setNewEmployee({ ...newemployee, address: e.target.value })
                 }
               />
             </Form.Group>

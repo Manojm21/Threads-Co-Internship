@@ -7,12 +7,12 @@ const Dashboard = () => {
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
       {/* Add the left logo */}
-      <div style={{ position: 'absolute', top: '80px', left: '15px' }}>
+      <div style={{ position: 'absolute', top: '15px', left: '15px' }}>
         <img src={image1} alt="TC logo" style={{ width: '130px' }} />
       </div>
       
       {/* Add the right logo */}
-      <div style={{ position: 'absolute', top: '90px', right: '15px' }}>
+      <div style={{ position: 'absolute', top: '20px', right: '15px' }}>
       <h2 className="text-center mb-4">Threads & Co.</h2> 
       </div>
 

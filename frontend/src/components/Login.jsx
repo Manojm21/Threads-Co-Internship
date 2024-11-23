@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import tcLogo from '../assets/Threads And Co.png';
@@ -28,6 +28,22 @@ const Login = () => {
   //   }
   // };
 
+
+  //The login button is clicked when the Enter key is pressed
+  useEffect(()=>{
+    const handleKeyPress = (event) => {
+      if(event.key == 'Enter'){
+        document.getElementById("loginButton").click();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyPress)
+
+    return(()=>{
+      window.removeEventListener("keydown", handleKeyPress); //After successful login the EventListener is removed
+    })
+  },[])
+
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${CONFIG.BACKEND_URL}/login`, {
@@ -55,7 +71,7 @@ const Login = () => {
       <img
         src={tcLogo}
         alt="TC Logo"
-        style={{ position: 'absolute', top: '70px', left: '10px', width: '120px' }}
+        style={{ position: 'absolute', top: '15px', left: '10px', width: '120px' }}
       />
 
       <div className="card p-4 shadow" style={{ maxWidth: '400px', width: '100%' }}>
@@ -90,6 +106,7 @@ const Login = () => {
           <button
             type="button"
             className="btn btn-primary btn-block"
+            id="loginButton"
             onClick={handleLogin}
           >
             Login

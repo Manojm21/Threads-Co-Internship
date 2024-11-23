@@ -11,12 +11,12 @@ const Navbar = () => {
 
   return (
     <nav
-      className="navbar navbar-expand-lg bg-primary"
+      className="navbar navbar-expand-lg bg-primary w-100 px-4 py-3"
+      style={{position: 'sticky', zIndex: '999', top: '0'}}
       data-bs-theme="dark"
-      style={{ padding: '0.75rem 0.5rem' }} // Adjust the padding here
     >
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/"><img
+        <Link className="navbar-brand" to="#"><img
           src={tcLogo}
           alt="Logo"
           style={{ width: '40px', height: '40px', borderRadius: '50%' }}

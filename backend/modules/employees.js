@@ -73,7 +73,7 @@ router.put('/:id', async (req, res) => {
         return res.status(400).json({ msg: 'Validation error', details: error.details });
       }
   
-      const { employee_id } = req.params;
+      const employee_id = req.params.id;
       const { name, gender, phone_number, role, date_of_joining,salary,advance } = value;
   
       // Build the SQL query dynamically based on provided fields

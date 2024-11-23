@@ -16,7 +16,7 @@ const App = () => {
   return (
     <AuthApi.Provider value={{ auth, setAuth }}>
       <Router>
-        <div className="container mt-5">
+        <div className="container-fluid" style={{'padding':'0'}}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

@@ -81,12 +81,12 @@ const Attendance = () => {
   );
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 zindex-1">
       <h1 className="text-center mb-4">Attendance Management</h1>
 
       {/* Attendance recorded message */}
       {attendanceRecorded && (
-        <Alert variant="success">
+        <Alert variant="success" style={{position: 'relative',zIndex:'1'}}>
           Attendance for today ({currentDate}) has already been recorded.
         </Alert>
       )}
