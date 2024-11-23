@@ -13,7 +13,8 @@ const employeeSchema = Joi.object({
     address: Joi.string().optional(),
     aadhar_number: Joi.string().pattern(/^[0-9]{12}$/).required(),  // Exactly 12 digits for Aadhar
     date_of_joining: Joi.date().iso().required(),
-    salary: Joi.number().precision(2).positive().required()
+    salary: Joi.number().precision(2).positive().required(),
+    advance: Joi.number().precision(2).positive()
 });
 
 //Route to get the names of all the employees in the db
@@ -46,13 +47,14 @@ router.post('/', async (req, res) => {
             address,
             aadhar_number,
             date_of_joining,
-            salary
+            salary,
+            advance
         } = value;
 
         const [result] = await db.promise().query(
-            `INSERT INTO Employees (name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary]
+            `INSERT INTO Employees (name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance]
         );
         res.status(201).json({ msg: "Successfully added employee", empID: result.insertId })
     }
