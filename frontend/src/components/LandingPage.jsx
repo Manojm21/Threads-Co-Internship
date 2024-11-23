@@ -1,30 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const LandingPage = () => {
-    const navigate = useNavigate();
 
     // Unified navigation handler
     const handleNavigation = (path) => {
         navigate(path);
     };
 
-    const handleLogout = () => {
-        navigate("/login");
-    };
-
     return (
         <div className="vh-100  d-flex flex-column align-items-center">
-            {/* Logout Button */}
-            <div className="position-absolute top-0 end-0 m-4">
-            <button
-                className="btn btn-danger px-4 py-2"
-                onClick={handleLogout}
-                style={{ fontSize: "16px", borderRadius: "8px", marginTop: "60px" }}>
-                Logout
-            </button>
-
-            </div>
 
             {/* Main Content */}
             <div className="text-center mt-5 pt-5 w-100">

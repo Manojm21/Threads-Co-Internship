@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CONFIG from '../config';
 
+
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');

@@ -16,15 +16,14 @@ const App = () => {
   return (
     <AuthApi.Provider value={{ auth, setAuth }}>
       <Router>
-        <Navbar /> {/* Navbar appears on all pages */}
         <div className="container mt-5">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/view" element={<RouteProtection><LandingPage /></RouteProtection>} />
-            <Route path="/stock" element={<RouteProtection><Stock /></RouteProtection>} />
-            <Route path="/employees" element={<RouteProtection><Employees /></RouteProtection>} />
-            <Route path="/attendance" element={<RouteProtection><Attendance /></RouteProtection>} />
+            <Route path="/view" element={<RouteProtection><Navbar/><LandingPage /></RouteProtection>} />
+            <Route path="/stock" element={<RouteProtection><Navbar/><Stock /></RouteProtection>} />
+            <Route path="/employees" element={<RouteProtection><Navbar/><Employees /></RouteProtection>} />
+            <Route path="/attendance" element={<RouteProtection><Navbar/><Attendance /></RouteProtection>} />
             <Route path="/" element={<Dashboard />} />
           </Routes>
         </div>
