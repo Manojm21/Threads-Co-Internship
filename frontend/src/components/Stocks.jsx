@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Button, Table, Modal, Form } from 'react-bootstrap';
 import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 
+
 const Stock = () => {
   const [stockData, setStockData] = useState([]);
   const [show, setShow] = useState(false);

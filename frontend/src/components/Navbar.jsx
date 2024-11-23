@@ -1,16 +1,27 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import tcLogo from '../assets/image.png';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/login');
+  };
+
   return (
     <nav
       className="navbar navbar-expand-lg bg-primary"
       data-bs-theme="dark"
-      style={{ padding: '0.75rem 1rem' }} // Adjust the padding here
+      style={{ padding: '0.75rem 0.5rem' }} // Adjust the padding here
     >
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/">Navbar</Link>
+        <Link className="navbar-brand" to="/"><img
+          src={tcLogo}
+          alt="Logo"
+          style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+        />
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -38,11 +49,12 @@ const Navbar = () => {
             </li>
           </ul>
           <div className="ms-auto">
-            <img
-              src={tcLogo}
-              alt="Logo"
-              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-            />
+            <button
+              className="btn btn-danger px-4 py-2"
+              onClick={handleLogout}
+              style={{ fontSize: "16px", borderRadius: "8px", marginTop: "5px" }}>
+              Logout
+            </button>
           </div>
         </div>
       </div>
