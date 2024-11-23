@@ -67,28 +67,68 @@ router.post('/', async (req, res) => {
 // Route to update salary for an employee
 router.put('/:id', async (req, res) => {
     try {
-      const { salary } = req.body;
-      const employeeId = req.params.id;
+      const { error, value } = employeeSchema.validate(req.body);
   
-      // Validate salary
-      if (isNaN(salary) || salary <= 0) {
-        return res.status(400).json({ msg: 'Invalid salary value' });
+      if (error) {
+        return res.status(400).json({ msg: 'Validation error', details: error.details });
       }
   
-      // Update salary in the database
-      const [result] = await db.promise().query(
-        `UPDATE Employees SET salary = ? WHERE employee_id = ?`,
-        [salary, employeeId]
-      );
+      const { employee_id } = req.params;
+      const { name, gender, phone_number, role, date_of_joining,salary,advance } = value;
+  
+      // Build the SQL query dynamically based on provided fields
+      const updates = [];
+      const params = [];
+  
+      if (name) {
+        updates.push('name = ?');
+        params.push(name);
+      }
+      if (gender) {
+        updates.push('gender = ?');
+        params.push(gender);
+      }
+      if (phone_number) {
+        updates.push('phone_number = ?');
+        params.push(phone_number);
+      }
+      if (role) {
+        updates.push('role = ?');
+        params.push(role);
+      }
+      if (date_of_joining) {
+        updates.push('date_of_joining = ?');
+        params.push(date_of_joining);
+      }
+      if (salary) {
+        updates.push('salary = ?');
+        params.push(salary);
+      }
+      if (advance) {
+        updates.push('advance = ?');
+        params.push(advance);
+      }
+  
+      // If there are no fields to update, return an error
+      if (updates.length === 0) {
+        return res.status(400).json({ msg: 'No valid fields provided for update' });
+      }
+  
+      // Add the id to the params array for the WHERE clause
+      params.push(employee_id);
+  
+      const query = `UPDATE Employees SET ${updates.join(', ')} WHERE employee_id = ?`;
+  
+      const [result] = await db.promise().query(query, params);
   
       if (result.affectedRows === 0) {
         return res.status(404).json({ msg: 'Employee not found' });
       }
   
-      res.status(200).json({ msg: 'Salary updated successfully' });
-    } catch (error) {
-      console.error('Error updating salary:', error);
-      res.status(500).json({ msg: 'Internal Server Error' });
+      res.status(200).json({ msg: 'Employee updated successfully' });
+    } catch (err) {
+      console.error('Error updating employee:', err);
+      res.status(500).json({ msg: 'Internal server error' });
     }
   });
   
