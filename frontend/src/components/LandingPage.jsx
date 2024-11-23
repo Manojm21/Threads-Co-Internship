@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const LandingPage = () => {
-
+    const navigate = useNavigate();
     // Unified navigation handler
     const handleNavigation = (path) => {
         navigate(path);
