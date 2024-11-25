@@ -43,6 +43,11 @@ const Attendance = () => {
     }));
   };
 
+  //To allow the user to submit the attendance only if attendance of all the employees is put
+  const isAttendanceComplete = () => {
+    return employees.every((employee)=> attendanceData[employee.employee_id]);
+  }
+
   const handleSubmitAttendance = () => {
     const payload = {
       attendance: Object.entries(attendanceData).map(([employeeId, status]) => ({
@@ -55,7 +60,8 @@ const Attendance = () => {
       .post(`${CONFIG.BACKEND_URL}/attendance`, payload)
       .then(() => {
         alert('Attendance submitted successfully!');
-        window.location.reload();
+        setAttendanceRecorded(true);
+        setAttendanceData({});
       })
       .catch((error) => {
         if (error.response?.data?.message) {
@@ -100,7 +106,11 @@ const Attendance = () => {
       />
 
       <div className="d-flex justify-content-between mb-4">
-        <Button variant="primary" onClick={handleSubmitAttendance}>
+        <Button 
+          variant="primary" 
+          onClick={handleSubmitAttendance} 
+          disabled={attendanceRecorded || !isAttendanceComplete()} //To not allow the user to submit attendance if attendance is already recorded
+        >
           Submit Attendance
         </Button>
         <Form.Control
