@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import {Link} from 'react-router-dom';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import tcLogo from '../assets/Threads And Co.png';
 import CONFIG from '../config'; // Import configuration file
@@ -34,10 +35,10 @@ const Register = () => {
       <img
         src={tcLogo}
         alt="TC Logo"
-        style={{ position: 'absolute', top: '70px', left: '10px', width: '130px' }}
+        style={{ position: 'absolute', top: '15px', left: '10px', width: '120px' }}
       />
 
-      <div style={{ position: 'absolute', top: '90px', right: '15px' }}>
+      <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
       <h2 className="text-center mb-4">Threads & Co.</h2> 
       </div>
 
@@ -93,6 +94,7 @@ const Register = () => {
                 {error}
               </div>
             )}
+            <div style={{marginTop: '10px'}}>Already have an account: <Link to={'/login'}>Login</Link></div>
           </form>
         </div>
       </div>

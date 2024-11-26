@@ -3,7 +3,7 @@ import axios from 'axios';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import tcLogo from '../assets/Threads And Co.png';
 import AuthApi from '../utils/AuthApi';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CONFIG from '../config'; // Import configuration file
 
 const Login = () => {
@@ -116,6 +116,7 @@ const Login = () => {
               {error}
             </div>
           )}
+          <div style={{marginTop: '10px'}}>Don't have an account: <Link to={'/register'}>Register</Link></div>
         </form>
       </div>
     </div>

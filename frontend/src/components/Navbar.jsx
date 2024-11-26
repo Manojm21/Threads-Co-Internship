@@ -1,18 +1,23 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import tcLogo from '../assets/image.png';
+import axios from 'axios';
+import CONFIG from '../config';
 
 const Navbar = () => {
-  const navigate = useNavigate();
 
   const handleLogout = () => {
-    navigate('/login');
+    axios
+      .post(`${CONFIG.BACKEND_URL}/logout`)
+      .then(() => { alert('User logout successfully') })
+      .catch((err) => { console.log("Error logging user out:", err) })
+    window.location.reload()
   };
 
   return (
     <nav
       className="navbar navbar-expand-lg bg-primary w-100 px-4 py-3"
-      style={{position: 'sticky', zIndex: '999', top: '0'}}
+      style={{ position: 'sticky', zIndex: '999', top: '0' }}
       data-bs-theme="dark"
     >
       <div className="container-fluid">
