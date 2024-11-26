@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, Form, Alert } from 'react-bootstrap';
+import { Button, Table, Form } from 'react-bootstrap';
 import 'bootswatch/dist/lux/bootstrap.min.css';
 import axios from 'axios';
 import CONFIG from '../config'; // Assuming CONFIG.BACKEND_URL is defined
+import AutoDismissAlert from '../components/AutoDismissAlert'; // Import the utility component
+import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
 const Attendance = () => {
   const [employees, setEmployees] = useState([]);
@@ -14,25 +16,39 @@ const Attendance = () => {
 
   const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
-  // Fetch employee data and check if today's attendance has been recorded
   useEffect(() => {
     axios
       .get(`${CONFIG.BACKEND_URL}/attendance`)
       .then((response) => {
-        setEmployees(response.data.employees || []);
+        const employees = response.data.employees || [];
+        setEmployees(employees);
+  
+        // Initialize attendanceData with default status for all employees
+        const initialAttendance = employees.reduce((acc, employee) => {
+          acc[employee.employee_id] = 'Absent'; // Set default status here
+          return acc;
+        }, {});
+        setAttendanceData(initialAttendance);
+  
         setAttendanceRecorded(response.data.attendanceRecorded || false);
       })
-      .catch((error) => console.error('Error fetching employees:', error));
+      .catch((error) => {
+        console.error('Error fetching employees:', error);
+        showAlert('Error fetching employee data.', 'danger');
+      });
   }, []);
+  
 
-  // Fetch monthly attendance summary
   useEffect(() => {
     if (month) {
       const monthNumber = month.split('-')[1];
       axios
         .get(`${CONFIG.BACKEND_URL}/attendance/${monthNumber}`)
         .then((response) => setMonthSummary(response.data))
-        .catch((error) => console.error('Error fetching month summary:', error));
+        .catch((error) => {
+          console.error('Error fetching month summary:', error);
+          showAlert('Failed to fetch monthly attendance summary.', 'danger');
+        });
     }
   }, [month]);
 
@@ -43,10 +59,9 @@ const Attendance = () => {
     }));
   };
 
-  //To allow the user to submit the attendance only if attendance of all the employees is put
   const isAttendanceComplete = () => {
-    return employees.every((employee)=> attendanceData[employee.employee_id]);
-  }
+    return employees.every((employee) => attendanceData[employee.employee_id]);
+  };
 
   const handleSubmitAttendance = () => {
     const payload = {
@@ -59,16 +74,15 @@ const Attendance = () => {
     axios
       .post(`${CONFIG.BACKEND_URL}/attendance`, payload)
       .then(() => {
-        alert('Attendance submitted successfully!');
+        showAlert('Attendance submitted successfully!', 'success');
         setAttendanceRecorded(true);
         setAttendanceData({});
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          alert(error.response.data.message);
-        } else {
-          console.error('Error submitting attendance:', error);
-        }
+        const errorMsg =
+          error.response?.data?.message || 'Error submitting attendance.';
+        console.error(errorMsg, error);
+        showAlert(errorMsg, 'danger');
       });
   };
 
@@ -92,9 +106,11 @@ const Attendance = () => {
 
       {/* Attendance recorded message */}
       {attendanceRecorded && (
-        <Alert variant="success" style={{position: 'relative',zIndex:'1'}}>
-          Attendance for today ({currentDate}) has already been recorded.
-        </Alert>
+        <AutoDismissAlert
+          variant="success"
+          message={`Attendance for today (${currentDate}) has already been recorded.`}
+          duration={3000}
+        />
       )}
 
       <Form.Control
@@ -106,10 +122,10 @@ const Attendance = () => {
       />
 
       <div className="d-flex justify-content-between mb-4">
-        <Button 
-          variant="primary" 
-          onClick={handleSubmitAttendance} 
-          disabled={attendanceRecorded || !isAttendanceComplete()} //To not allow the user to submit attendance if attendance is already recorded
+        <Button
+          variant="primary"
+          onClick={handleSubmitAttendance}
+          disabled={attendanceRecorded || !isAttendanceComplete()}
         >
           Submit Attendance
         </Button>

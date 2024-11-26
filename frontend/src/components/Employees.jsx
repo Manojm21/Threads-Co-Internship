@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Table, Modal, Form } from 'react-bootstrap';
 import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
+import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
 
 const Employees = () => {
@@ -48,7 +49,7 @@ const Employees = () => {
 
   const handleAddEmployee = () => {
     if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance) {
-      alert('Please fill in all fields correctly.');
+      showAlert('Please fill in all fields correctly.','warning');
       return;
     }
 
@@ -66,7 +67,7 @@ const Employees = () => {
           salary: 0,
           advance: 0
         });
-        alert("Added Employee successfully")
+        showAlert("Added Employee successfully",'success')
         setShow(false);
       })
       .catch((error) => console.error('Error adding employee:', error));
@@ -79,7 +80,7 @@ const Employees = () => {
         setEmployees((prev) =>
           prev.map((item) => (item.employee_id === editemployee.employee_id ? { ...editemployee } : item))
         );
-        alert("Edited employee successfully");
+        showAlert("Edited employee successfully",'success');
         setShow(false);
         setEditemployee(null);
       })
@@ -91,7 +92,7 @@ const Employees = () => {
       .delete(`${CONFIG.BACKEND_URL}/employees/${id}`)
       .then(() => {
         setEmployees(employees.filter((item) => item.employee_id !== id));
-        alert("Deleted employee successfully")
+        showAlert("Deleted employee successfully",'success')
       })
       .catch((error) => console.error('Error deleting Employee:', error));
   };
@@ -105,23 +106,23 @@ const Employees = () => {
 
   const handleGetSalary = () => {
     if (!salaryMonth) {
-      alert('Please enter a valid month.');
+      showAlert('Please enter a valid month.','warning');
       return;
     }
     axios
       .get(`${CONFIG.BACKEND_URL}/salary/${viewSalaryEmployee.employee_id}/${salaryMonth.split('-')[1]}`)
       .then((response) => {
         setSalaryDetails(response.data);
-        alert('Salary Fetched Successfully');
+        showAlert('Salary Fetched Successfully','success');
       })
       .catch((err)=> {
         //When the attendance data for the entire month is not present
         if(err.response.status == 400){
-          alert("The attendance of the employee for the entire month is not available");
+          showAlert("The attendance of the employee for the entire month is not available");
           return;
         }
         console.log("Error fetching salary: ", err);
-        alert('Failed to fetch the salary of the employee');
+        showAlert('Failed to fetch the salary of the employee','error');
       })
   }
 

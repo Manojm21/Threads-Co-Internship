@@ -3,13 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import tcLogo from '../assets/image.png';
 import axios from 'axios';
 import CONFIG from '../config';
+import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
+
 
 const Navbar = () => {
 
   const handleLogout = () => {
     axios
       .post(`${CONFIG.BACKEND_URL}/logout`)
-      .then(() => { alert('User logout successfully') })
+      .then(() => { showAlert('User logout successfully','success') })
       .catch((err) => { console.log("Error logging user out:", err) })
     window.location.reload()
   };
