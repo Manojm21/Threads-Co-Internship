@@ -13,6 +13,7 @@ const Attendance = () => {
   const [monthSummary, setMonthSummary] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [attendanceRecorded, setAttendanceRecorded] = useState(false);
+  const [isHoliday, setIsHoliday] = useState(false);
 
   const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
@@ -22,14 +23,14 @@ const Attendance = () => {
       .then((response) => {
         const employees = response.data.employees || [];
         setEmployees(employees);
-  
+
         // Initialize attendanceData with default status for all employees
         const initialAttendance = employees.reduce((acc, employee) => {
           acc[employee.employee_id] = 'Absent'; // Set default status here
           return acc;
         }, {});
         setAttendanceData(initialAttendance);
-  
+
         setAttendanceRecorded(response.data.attendanceRecorded || false);
       })
       .catch((error) => {
@@ -37,7 +38,7 @@ const Attendance = () => {
         showAlert('Error fetching employee data.', 'danger');
       });
   }, []);
-  
+
 
   useEffect(() => {
     if (month) {
@@ -100,6 +101,24 @@ const Attendance = () => {
       employee.name.toLowerCase().includes(searchQuery)
   );
 
+  const handleHolidayChange = () => {
+    setIsHoliday(!isHoliday)
+    if (!isHoliday) {
+      const holidayAttendace = employees.reduce((acc, employee) => {
+        acc[employee.employee_id] = 'Holiday'; // Set Holiday status to all employees
+        return acc;
+      }, {});
+      setAttendanceData(holidayAttendace);
+    }
+    else {
+      const holidayAttendace = employees.reduce((acc, employee) => {
+        acc[employee.employee_id] = 'Absent'; // Set Holiday status to all employees
+        return acc;
+      }, {});
+      setAttendanceData(holidayAttendace);
+    }
+  }
+
   return (
     <div className="container mt-4 zindex-1">
       <h1 className="text-center mb-4">Attendance Management</h1>
@@ -129,6 +148,12 @@ const Attendance = () => {
         >
           Submit Attendance
         </Button>
+        <Form.Check
+          type="checkbox"
+          checked={isHoliday}
+          onChange={handleHolidayChange}
+          label="Today is Holiday"
+        />
         <Form.Control
           type="month"
           value={month}
