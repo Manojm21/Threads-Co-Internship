@@ -177,7 +177,7 @@ const Attendance = () => {
               <td>{employee.employee_id}</td>
               <td>{employee.name}</td>
               <td>
-                {['Present', 'Absent', 'On Leave', 'Holiday'].map((status) => (
+                {['Present', 'Absent', 'Holiday'].map((status) => (
                   <Form.Check
                     type="radio"
                     label={status}

@@ -14,7 +14,7 @@ const employeeSchema = Joi.object({
     aadhar_number: Joi.string().pattern(/^[0-9]{12}$/).required(),  // Exactly 12 digits for Aadhar
     date_of_joining: Joi.date().iso().required(),
     salary: Joi.number().precision(2).positive().required(),
-    advance: Joi.number().precision(2).positive()
+    advance: Joi.number().precision(2)
 });
 
 //Route to get the names of all the employees in the db
@@ -100,15 +100,15 @@ router.put('/:id', async (req, res) => {
         updates.push('date_of_joining = ?');
         params.push(date_of_joining);
       }
-      if (salary) {
+      if (salary!=undefined) {
         updates.push('salary = ?');
         params.push(salary);
       }
-      if (advance) {
+      if (advance!=undefined) {
         updates.push('advance = ?');
         params.push(advance);
       }
-  
+      
       // If there are no fields to update, return an error
       if (updates.length === 0) {
         return res.status(400).json({ msg: 'No valid fields provided for update' });

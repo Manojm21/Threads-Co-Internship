@@ -33,7 +33,7 @@ const Employees = () => {
         name: '',
         gender: '',
         phone_number: 0,
-        role: 0,
+        role: '',
         date_of_joining: '',
         salary: 0,
         advance: 0
