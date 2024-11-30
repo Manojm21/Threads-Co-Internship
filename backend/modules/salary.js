@@ -31,7 +31,7 @@ router.get('/:id/:month', async (req, res) => {
         })
     }
     else {
-        const netSalary = sal - (sal / (pdn + adn + odn)) * adn;
+        const netSalary = sal - (sal / (daysInMonth(today.getFullYear(), curr_month))) * adn;
         res.status(201).json({ payableSalary: netSalary.toFixed(2) });
     }
 
