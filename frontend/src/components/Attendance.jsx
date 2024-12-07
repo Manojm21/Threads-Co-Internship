@@ -119,10 +119,14 @@ const Attendance = () => {
     }
   }
 
+
+  
+
   return (
     <div className="container mt-4 zindex-1">
       <h1 className="text-center mb-4">Attendance Management</h1>
-
+      
+      
       {/* Attendance recorded message */}
       {attendanceRecorded && (
         <AutoDismissAlert
@@ -131,6 +135,7 @@ const Attendance = () => {
           duration={3000}
         />
       )}
+      
 
       <Form.Control
         type="text"

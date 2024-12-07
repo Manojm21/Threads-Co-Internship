@@ -15,6 +15,7 @@ const employeesRouter = require('./modules/employees');
 const attendanceRouter = require('./modules/attendance');
 const salaryRouter = require('./modules/salary');
 const stockRouter = require('./modules/stock');
+const flushRouter= require('./modules/flush');
 
 // Middleware setup
 app.use(express.json());
@@ -40,6 +41,9 @@ app.use('/employees', employeesRouter);
 app.use('/attendance', attendanceRouter);
 app.use('/salary',salaryRouter);
 app.use('/stock', stockRouter);
+app.use('/flush',flushRouter);
+
+  
 
 // Start the server
 app.listen(port, () => {

@@ -54,6 +54,9 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/stock">Stock</Link>
             </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/flush">Flush</Link>
+            </li>
           </ul>
           <div className="ms-auto">
             <button

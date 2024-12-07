@@ -4,7 +4,6 @@ import { Button, Table, Modal, Form } from 'react-bootstrap';
 import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
-
 const Stock = () => {
   const [stockData, setStockData] = useState([]);
   const [show, setShow] = useState(false);
@@ -16,7 +15,8 @@ const Stock = () => {
     total_quantity: 0,
     balance_quantity: 0,
     Rack_no: '',
-    Size: ''
+    Size: '',
+    bulk_retail: 'bulk' // Added bulk_retail with default value 'bulk'
   });
 
   // Fetch all stock items on component mount
@@ -45,7 +45,8 @@ const Stock = () => {
           total_quantity: 0,
           balance_quantity: 0,
           Rack_no: '',
-          Size: ''
+          Size: '',
+          bulk_retail: 'bulk' // Reset bulk_retail to default value 'bulk'
         });
         setShow(false);
       })
@@ -85,10 +86,11 @@ const Stock = () => {
         id: '',
         name: '',
         colour: '',
-        total_quantity: 0,
-        balance_quantity: 0,
+        total_quantity: '',
+        balance_quantity: '',
         Rack_no: '',
-        Size: ''
+        Size: '',
+        bulk_retail: 'bulk' // Set default value for bulk_retail when adding a new item
       });
     }
     setShow(true);
@@ -116,6 +118,7 @@ const Stock = () => {
             <th>Balance Quantity</th>
             <th>Rack No</th>
             <th>Size</th>
+            <th>Stock Type</th> {/* Display stock type in table */}
             <th>Actions</th>
           </tr>
         </thead>
@@ -129,6 +132,7 @@ const Stock = () => {
               <td>{item.balance_quantity}</td>
               <td>{item.Rack_no}</td>
               <td>{item.Size}</td>
+              <td>{item.bulk_retail}</td> {/* Display the bulk_retail value */}
               <td>
                 <Button variant="warning" onClick={() => handleShow(item)}>
                   Edit
@@ -240,6 +244,37 @@ const Stock = () => {
                     : setNewItem({ ...newItem, Size: e.target.value })
                 }
               />
+            </Form.Group>
+
+            {/* Radio buttons for bulk_retail */}
+            <Form.Group controlId="formBulkRetail">
+              <Form.Label>Stock Type</Form.Label>
+              <div>
+                <Form.Check
+                  type="radio"
+                  label="Bulk"
+                  name="bulk_retail"
+                  value="bulk"
+                  checked={editItem ? editItem.bulk_retail === 'bulk' : newItem.bulk_retail === 'bulk'}
+                  onChange={() =>
+                    editItem
+                      ? setEditItem({ ...editItem, bulk_retail: 'bulk' })
+                      : setNewItem({ ...newItem, bulk_retail: 'bulk' })
+                  }
+                />
+                <Form.Check
+                  type="radio"
+                  label="Retail"
+                  name="bulk_retail"
+                  value="retail"
+                  checked={editItem ? editItem.bulk_retail === 'retail' : newItem.bulk_retail === 'retail'}
+                  onChange={() =>
+                    editItem
+                      ? setEditItem({ ...editItem, bulk_retail: 'retail' })
+                      : setNewItem({ ...newItem, bulk_retail: 'retail' })
+                  }
+                />
+              </div>
             </Form.Group>
           </Form>
         </Modal.Body>
