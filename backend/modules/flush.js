@@ -9,7 +9,7 @@ router.delete('/', async (req, res) => {
         DELETE FROM Attendance
         WHERE date < CURDATE() - INTERVAL 11 MONTH;
       `;
-     
+    //  change month where necessary
       await db.promise().query(query);  
       res.status(200).json({ message: 'Old attendance records deleted successfully' });
     } catch (error) {

@@ -4,7 +4,6 @@ import { Button, Table, Modal, Form } from 'react-bootstrap';
 import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
-
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [editemployee, setEditemployee] = useState(null);
@@ -14,18 +13,29 @@ const Employees = () => {
   const [salaryDetails, setSalaryDetails] = useState(null);
   const [show, setShow] = useState(false);
   const [newemployee, setNewEmployee] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
+  const [isExpanded, setIsExpanded] = useState(false); // State for managing table expansion
 
   useEffect(() => {
     axios
       .get(`${CONFIG.BACKEND_URL}/employees`)
       .then((response) => setEmployees(response.data))
-      .catch((error) => console.error('Error fetching stock data:', error));
+      .catch((error) => console.error('Error fetching employee data:', error));
   }, []);
+
+  // Filter employees based on search query (includes employee_id, name, gender, role)
+  const filteredEmployees = employees.filter((item) => {
+    return (
+      item.employee_id.toString().includes(searchQuery) ||
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.gender.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.role.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   const handleShow = (item = null) => {
     if (item) {
       setEditemployee(item); // Set the item to be edited
-      console.log(item)
     }
     else {
       setNewEmployee({
@@ -36,7 +46,8 @@ const Employees = () => {
         role: '',
         date_of_joining: '',
         salary: 0,
-        advance: 0
+        advance: 0,
+        notes: '' // Add notes field here for new employees
       })
     }
     setShow(true);
@@ -48,7 +59,7 @@ const Employees = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance) {
+    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance || !newemployee.notes) {
       showAlert('Please fill in all fields correctly.','warning');
       return;
     }
@@ -62,12 +73,13 @@ const Employees = () => {
           name: '',
           gender: '',
           phone_number: 0,
-          role: 0,
+          role: '',
           date_of_joining: '',
           salary: 0,
-          advance: 0
+          advance: 0,
+          notes: '' // Reset notes field
         });
-        showAlert("Added Employee successfully",'success')
+        showAlert("Added Employee successfully",'success');
         setShow(false);
       })
       .catch((error) => console.error('Error adding employee:', error));
@@ -80,8 +92,7 @@ const Employees = () => {
         setEmployees((prev) =>
           prev.map((item) => (item.employee_id === editemployee.employee_id ? { ...editemployee } : item))
         );
-        showAlert("Edited employee successfully",'success');
-        setShow(false);
+        
         setEditemployee(null);
       })
       .catch((error) => console.error('Error updating employee:', error));
@@ -92,7 +103,7 @@ const Employees = () => {
       .delete(`${CONFIG.BACKEND_URL}/employees/${id}`)
       .then(() => {
         setEmployees(employees.filter((item) => item.employee_id !== id));
-        showAlert("Deleted employee successfully",'success')
+        // showAlert("Deleted employee successfully",'success')
       })
       .catch((error) => console.error('Error deleting Employee:', error));
   };
@@ -113,10 +124,9 @@ const Employees = () => {
       .get(`${CONFIG.BACKEND_URL}/salary/${viewSalaryEmployee.employee_id}/${salaryMonth.split('-')[1]}`)
       .then((response) => {
         setSalaryDetails(response.data);
-        showAlert('Salary Fetched Successfully','success');
+        // showAlert('Salary Fetched Successfully','success');
       })
       .catch((err)=> {
-        //When the attendance data for the entire month is not present
         if(err.response.status == 400){
           showAlert("The attendance of the employee for the entire month is not available");
           return;
@@ -132,48 +142,90 @@ const Employees = () => {
     setShowSalaryModal(false);
   }
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const toggleTableExpansion = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
   return (
-    <div className="container-fluid mt-4 mb-4" >
+    <div className="container-fluid mt-4 mb-4">
       <h1 className="text-center mb-4">Employee Details</h1>
-      <Button variant="primary" onClick={() => handleShow()}>
-        Create Employee
-      </Button>
+
+      {/* Search Input */}
+      <Form.Control
+        type="text"
+        placeholder="Search by Employee ID, Name, Gender, or Role"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        style={{ width: '300px', marginBottom: '20px' }}
+      />
+
+<div className="d-flex justify-content-between mb-3">
+  {/* Left-aligned Create Employee Button */}
+  <Button variant="primary" onClick={() => handleShow()}>
+    Create Employee
+  </Button>
+
+  {/* Right-aligned Toggle Button */}
+  <Button variant="success" onClick={toggleTableExpansion}>
+    {isExpanded ? "View Less" : "View More"}
+  </Button>
+</div>
+
+
       <Table striped bordered hover className="mt-3">
         <thead style={{ top: '83px', position: 'sticky', zIndex: '999' }}>
           <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Gender</th>
-            <th>Phone Number</th>
             <th>Role</th>
-            <th>Date Of Joining</th>
-            <th>Salary</th>
-            <th>Advance</th>
+            <th>Salary & Advance</th>
             <th>Actions</th>
+                       
+            {isExpanded && (
+              <>
+              
+              <th>Phone Number</th>
+              <th>Date Of Joining</th>
+              <th>Notes</th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody>
-          {employees.map((item) => (
+          {filteredEmployees.map((item) => (
             <tr key={item.employee_id}>
               <td>{item.employee_id}</td>
               <td>{item.name}</td>
               <td>{item.gender}</td>
-              <td>{item.phone_number}</td>
               <td>{item.role}</td>
-              <td>{item.date_of_joining.split('T')[0]}</td>
-              <td>{item.salary}</td>
-              <td>{item.advance}</td>
               <td>
-                <Button variant="warning" onClick={() => handleShow(item)}>
-                  Edit
-                </Button>{' '}
-                <Button variant="danger" onClick={() => handleDeleteEmployee(item.employee_id)}>
-                  Delete
-                </Button>
-                <Button variant="normal" onClick={() => handleViewSalary(item)}>
-                  View Salary
-                </Button>
-              </td>
+  <div>Salary: Rs {item.salary}</div>
+  <div>Advance: Rs {item.advance}</div>
+</td>
+
+                  <td>
+                    <Button variant="warning" onClick={() => handleShow(item)}>
+                      Edit
+                    </Button>{' '}
+                    <Button variant="danger" onClick={() => handleDeleteEmployee(item.employee_id)}>
+                      Delete
+                    </Button>{' '}
+                    <Button variant="info" onClick={() => handleViewSalary(item)}>
+                      View Salary
+                    </Button>
+                  </td>
+              {isExpanded && (
+                <>
+                <td>{item.phone_number}</td>
+                <td>{item.date_of_joining.split('T')[0]}</td>
+                <td>{item.notes}</td>
+                </>
+              )}
             </tr>
           ))}
         </tbody>
@@ -244,11 +296,11 @@ const Employees = () => {
                 }
               />
             </Form.Group>
-            <Form.Group controlId="formgender">
+            <Form.Group controlId="formGender">
               <Form.Label>Gender</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Gender"
+                placeholder="Enter employee gender"
                 value={editemployee ? editemployee.gender : newemployee.gender}
                 onChange={(e) =>
                   editemployee
@@ -257,11 +309,11 @@ const Employees = () => {
                 }
               />
             </Form.Group>
-            <Form.Group controlId="formPhoneNo">
+            <Form.Group controlId="formPhone">
               <Form.Label>Phone Number</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter Phone Number"
+                placeholder="Enter employee phone number"
                 value={editemployee ? editemployee.phone_number : newemployee.phone_number}
                 onChange={(e) =>
                   editemployee
@@ -274,7 +326,7 @@ const Employees = () => {
               <Form.Label>Role</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter Role"
+                placeholder="Enter employee role"
                 value={editemployee ? editemployee.role : newemployee.role}
                 onChange={(e) =>
                   editemployee
@@ -284,11 +336,11 @@ const Employees = () => {
               />
             </Form.Group>
             <Form.Group controlId="formDOJ">
-              <Form.Label>Date of Joining</Form.Label>
+              <Form.Label>Date Of Joining</Form.Label>
               <Form.Control
                 type="date"
-                placeholder="Enter date"
-                value={editemployee ? editemployee.date_of_joining : newemployee.date_of_joining}
+                placeholder="Enter date of joining"
+                value={editemployee ? editemployee.date_of_joining.split('T')[0] : newemployee.date_of_joining}
                 onChange={(e) =>
                   editemployee
                     ? setEditemployee({ ...editemployee, date_of_joining: e.target.value })
@@ -296,11 +348,11 @@ const Employees = () => {
                 }
               />
             </Form.Group>
-            <Form.Group controlId='formSalary'>
+            <Form.Group controlId="formSalary">
               <Form.Label>Salary</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter salary of the employee"
+                placeholder="Enter salary"
                 value={editemployee ? editemployee.salary : newemployee.salary}
                 onChange={(e) =>
                   editemployee
@@ -309,11 +361,11 @@ const Employees = () => {
                 }
               />
             </Form.Group>
-            <Form.Group controlId='formAdvance'>
+            <Form.Group controlId="formAdvance">
               <Form.Label>Advance</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter advance of the employee"
+                placeholder="Enter advance"
                 value={editemployee ? editemployee.advance : newemployee.advance}
                 onChange={(e) =>
                   editemployee
@@ -322,29 +374,17 @@ const Employees = () => {
                 }
               />
             </Form.Group>
-            <Form.Group controlId='formAadhar'>
-              <Form.Label>Aadhar Number</Form.Label>
+            <Form.Group controlId="formNotes">
+              <Form.Label>Notes</Form.Label>
               <Form.Control
-                type="number"
-                placeholder="Enter aadhar number of the employee"
-                value={editemployee ? editemployee.aadhar_number : newemployee.aadhar_number}
+                as="textarea"
+                rows={3}
+                placeholder="Enter any notes for the employee"
+                value={editemployee ? editemployee.notes : newemployee.notes}
                 onChange={(e) =>
                   editemployee
-                    ? setEditemployee({ ...editemployee, aadhar_number: e.target.value })
-                    : setNewEmployee({ ...newemployee, aadhar_number: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group controlId='formAddress'>
-              <Form.Label>Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter address of the employee"
-                value={editemployee ? editemployee.address : newemployee.address}
-                onChange={(e) =>
-                  editemployee
-                    ? setEditemployee({ ...editemployee, address: e.target.value })
-                    : setNewEmployee({ ...newemployee, address: e.target.value })
+                    ? setEditemployee({ ...editemployee, notes: e.target.value })
+                    : setNewEmployee({ ...newemployee, notes: e.target.value })
                 }
               />
             </Form.Group>
@@ -361,6 +401,6 @@ const Employees = () => {
       </Modal>
     </div>
   );
-
 };
-export default Employees
+
+export default Employees;

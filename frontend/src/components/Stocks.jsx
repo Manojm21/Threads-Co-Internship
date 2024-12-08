@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Form, InputGroup, FormControl } from 'react-bootstrap';
 import CONFIG from '../config'; // Ensure CONFIG.BACKEND_URL is defined
 import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
@@ -18,6 +18,7 @@ const Stock = () => {
     Size: '',
     bulk_retail: 'bulk' // Added bulk_retail with default value 'bulk'
   });
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
 
   // Fetch all stock items on component mount
   useEffect(() => {
@@ -30,7 +31,7 @@ const Stock = () => {
   // Add a new stock item
   const handleAddItem = () => {
     if (!newItem.id || !newItem.name || !newItem.colour || newItem.total_quantity <= 0) {
-      showAlert('Please fill in all fields correctly.','warning');
+      showAlert('Please fill in all fields correctly.', 'warning');
       return;
     }
 
@@ -102,12 +103,35 @@ const Stock = () => {
     setEditItem(null); // Clear edit state
   };
 
+  // Filter stock data based on search term
+  const filteredStockData = stockData.filter((item) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      item.id.toString().includes(term) ||
+      item.name.toLowerCase().includes(term) ||
+      item.Rack_no.toLowerCase().includes(term) ||
+      item.Size.toLowerCase().includes(term) ||
+      item.bulk_retail.toLowerCase().includes(term)
+    );
+  });
+
   return (
     <div className="container mt-4">
       <h1 className="text-center mb-4">Stock Management</h1>
+      
+      {/* Search Input */}
+      <InputGroup className="mb-3">
+        <FormControl
+          placeholder="Search by ID, Name, Rack No, Size, or Stock Type"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </InputGroup>
+
       <Button variant="primary" onClick={() => handleShow()}>
         Add New Item
       </Button>
+
       <Table striped bordered hover className="mt-3">
         <thead>
           <tr>
@@ -123,7 +147,7 @@ const Stock = () => {
           </tr>
         </thead>
         <tbody>
-          {stockData.map((item) => (
+          {filteredStockData.map((item) => (
             <tr key={item.id}>
               <td>{item.id}</td>
               <td>{item.name}</td>

@@ -14,6 +14,7 @@ const Attendance = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [attendanceRecorded, setAttendanceRecorded] = useState(false);
   const [isHoliday, setIsHoliday] = useState(false);
+  const [canEditAttendance, setCanEditAttendance] = useState(true); // New state for editing permission
 
   const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
@@ -39,7 +40,6 @@ const Attendance = () => {
       });
   }, []);
 
-
   useEffect(() => {
     if (month) {
       const monthNumber = month.split('-')[1];
@@ -53,6 +53,7 @@ const Attendance = () => {
     }
   }, [month]);
 
+  // Handle attendance change (present, absent, holiday)
   const handleAttendanceChange = (employeeId, status) => {
     setAttendanceData((prevData) => ({
       ...prevData,
@@ -75,7 +76,7 @@ const Attendance = () => {
     axios
       .post(`${CONFIG.BACKEND_URL}/attendance`, payload)
       .then(() => {
-        showAlert('Attendance submitted successfully!', 'success');
+        // showAlert('Attendance submitted successfully!', 'success');
         setAttendanceRecorded(true);
         setAttendanceData({});
       })
@@ -102,30 +103,28 @@ const Attendance = () => {
   );
 
   const handleHolidayChange = () => {
-    setIsHoliday(!isHoliday)
-    if (!isHoliday) {
-      const holidayAttendace = employees.reduce((acc, employee) => {
-        acc[employee.employee_id] = 'Holiday'; // Set Holiday status to all employees
-        return acc;
-      }, {});
-      setAttendanceData(holidayAttendace);
-    }
-    else {
-      const holidayAttendace = employees.reduce((acc, employee) => {
-        acc[employee.employee_id] = 'Absent'; // Set Holiday status to all employees
-        return acc;
-      }, {});
-      setAttendanceData(holidayAttendace);
-    }
-  }
+    setIsHoliday(!isHoliday);
+    const holidayAttendance = employees.reduce((acc, employee) => {
+      acc[employee.employee_id] = isHoliday ? 'Absent' : 'Holiday'; // Toggle between Holiday and Absent
+      return acc;
+    }, {});
+    setAttendanceData(holidayAttendance);
+  };
 
-
-  
+  // Check if attendance can be edited (only for today)
+  useEffect(() => {
+    if (attendanceRecorded) {
+      const attendanceDate = new Date(currentDate);
+      const today = new Date().toISOString().split('T')[0];
+      if (today !== currentDate) {
+        setCanEditAttendance(false); // Disable editing if it's not the present day
+      }
+    }
+  }, [attendanceRecorded]);
 
   return (
     <div className="container mt-4 zindex-1">
       <h1 className="text-center mb-4">Attendance Management</h1>
-      
       
       {/* Attendance recorded message */}
       {attendanceRecorded && (
@@ -135,7 +134,6 @@ const Attendance = () => {
           duration={3000}
         />
       )}
-      
 
       <Form.Control
         type="text"
@@ -193,6 +191,7 @@ const Attendance = () => {
                       handleAttendanceChange(employee.employee_id, status)
                     }
                     key={status}
+                    disabled={!canEditAttendance} // Disable editing if attendance can't be edited
                   />
                 ))}
               </td>
