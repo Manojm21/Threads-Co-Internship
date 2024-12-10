@@ -7,15 +7,17 @@ import { FaExclamationTriangle } from 'react-icons/fa'; // You can install react
 const Flush = () => {
   // Function to handle cleanup of old records
   const handleCleanup = () => {
-    axios
-      .delete(`${CONFIG.BACKEND_URL}/flush`)
-      .then((response) => {
-        alert('Old records deleted successfully');
-      })
-      .catch((error) => {
-        console.error('Error cleaning up records:', error);
-        alert('Failed to delete old records');
-      });
+    if (confirm("Are you sure you want to flush the database?")) {
+      axios
+        .delete(`${CONFIG.BACKEND_URL}/flush`)
+        .then((response) => {
+          alert('Old records deleted successfully');
+        })
+        .catch((error) => {
+          console.error('Error cleaning up records:', error);
+          alert('Failed to delete old records');
+        });
+    }
   };
 
   return (

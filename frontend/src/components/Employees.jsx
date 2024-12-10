@@ -94,6 +94,7 @@ const Employees = () => {
         );
         
         setEditemployee(null);
+        setShow(false);
       })
       .catch((error) => console.error('Error updating employee:', error));
   };
