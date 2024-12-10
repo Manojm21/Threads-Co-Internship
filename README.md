@@ -42,3 +42,46 @@ A comprehensive **Employee Management System** built with a **React.js** fronten
    ```bash
    git clone https://github.com/Shre-sg/Internship.git
    cd Internship
+   ```
+   
+2. Backend Setup
+   - Navigate to backend folder
+   ```bash
+   cd backend
+   ```
+   - Install dependencies
+   ```bash
+   npm install
+   ```
+   - Configure the database connection: Update the credentials in the .env file
+   ```bash
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=yourpassword
+   DB_NAME=employeedb
+   ```
+   - Running the backend server
+   ```bash
+   npm run dev
+   ```
+
+3. Frontend Setup
+   - Navigate to frontend folder
+   ```bash
+   cd frontend
+   ```
+   - Install dependencies
+   ```bash
+   npm install
+   ```
+   - Configure the backend API URL in the config.js file:
+   ```bash
+   const CONFIG = {
+    BACKEND_URL: <Enter your backend URL here>
+   };
+   export default CONFIG;
+   ```
+   - Running the backend server
+   ```bash
+   npm run dev
+   ```
