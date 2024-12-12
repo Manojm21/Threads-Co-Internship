@@ -10,6 +10,7 @@ const Employees = () => {
   const [viewSalaryEmployee, setViewSalaryEmployee] = useState('');
   const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [salaryMonth, setSalaryMonth] = useState('');
+  const [salaryYear, setSalaryYear] = useState('');
   const [salaryDetails, setSalaryDetails] = useState(null);
   const [show, setShow] = useState(false);
   const [newemployee, setNewEmployee] = useState([]);
@@ -113,16 +114,17 @@ const Employees = () => {
     setViewSalaryEmployee(emp);
     setSalaryDetails(null);
     setSalaryMonth('');
+    setSalaryYear('');
     setShowSalaryModal(true);
   }
 
   const handleGetSalary = () => {
-    if (!salaryMonth) {
-      showAlert('Please enter a valid month.','warning');
+    if (!salaryMonth || !salaryYear) {
+      showAlert('Please enter a valid month and year','warning');
       return;
     }
     axios
-      .get(`${CONFIG.BACKEND_URL}/salary/${viewSalaryEmployee.employee_id}/${salaryMonth.split('-')[1]}`)
+      .get(`${CONFIG.BACKEND_URL}/salary/${viewSalaryEmployee.employee_id}/${salaryMonth}/${salaryYear}`)
       .then((response) => {
         setSalaryDetails(response.data);
         // showAlert('Salary Fetched Successfully','success');
@@ -140,6 +142,7 @@ const Employees = () => {
   const handleCloseSalaryModal = () => {
     setSalaryDetails(null);
     setSalaryMonth('');
+    setSalaryYear('');
     setShowSalaryModal(false);
   }
 
@@ -238,13 +241,22 @@ const Employees = () => {
           <Modal.Title>{viewSalaryEmployee.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form.Group controlId="formMonth">
+          <Form.Group controlId="formMonth" style={{marginBottom : '20px'}}>
             <Form.Label>Enter Month</Form.Label>
             <Form.Control
-              type="month"
-              placeholder="YYYY-MM"
+              type="text"
+              placeholder="MM"
               value={salaryMonth}
               onChange={(e) => setSalaryMonth(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group controlId = "formYear">
+            <Form.Control
+              type = "text"
+              placeholder= "YYYY"
+              value={salaryYear}
+              onChange={(e) => setSalaryYear(e.target.value)}
             />
           </Form.Group>
           {salaryDetails && (
