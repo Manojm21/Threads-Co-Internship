@@ -7,13 +7,14 @@ import { showAlert } from '../utils/alertUtils'; // Ensure this utility is imple
 
 
 const Navbar = () => {
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    axios
-      .post(`${CONFIG.BACKEND_URL}/logout`)
-      .then(() => { showAlert('User logout successfully','success') })
-      .catch((err) => { console.log("Error logging user out:", err) })
-    window.location.reload()
+    // axios
+    //   .post(`${CONFIG.BACKEND_URL}/logout`)
+    //   .then(() => { showAlert('User logout successfully','success') })
+    //   .catch((err) => { console.log("Error logging user out:", err) })
+    navigate('/login')
   };
 
   return (
