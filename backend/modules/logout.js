@@ -13,23 +13,23 @@ router.post('/', (req, res) => {
         req.session.destroy((err) => {
             if (err) {
                 console.error('Error destroying session:', err);
-                return res.status(500).json({ msg: 'Internal Server Error' });
+                return res.status(500).json({ msg: 'Failed to log out. Please try again.' });
             }
-            res.clearCookie('sessionId');
-            
-            // Disable caching
-            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-            res.setHeader('Pragma', 'no-cache');
-            res.setHeader('Expires', '0');
 
-            res.json({ msg: 'Logout successful!' });
+            // Clear the session cookie
+            res.clearCookie('sessionId', { path: '/' });
+
+            // Set cache control headers to prevent storing sensitive data
+            res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.set('Pragma', 'no-cache');
+            res.set('Expires', '0');
+
+            return res.status(200).json({ msg: 'Logout successful!' });
         });
     } else {
-        res.json({ msg: 'No session to destroy!' });
+        // Session does not exist
+        return res.status(400).json({ msg: 'No active session to log out.' });
     }
 });
-
-
-
 
 module.exports = router;

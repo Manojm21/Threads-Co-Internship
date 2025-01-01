@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
-const db = require('./db')
+const pool = require('./db'); // Import the connection pool
 
 // Schema validation for the Stock item
 const itemSchema = Joi.object({
@@ -19,7 +19,7 @@ const itemSchema = Joi.object({
 router.post('/', async (req, res) => {
     try {
         console.log("Received body:", req.body);
-        
+
         // Validate the incoming data
         const { error, value } = itemSchema.validate(req.body);
         if (error) {
@@ -28,17 +28,19 @@ router.post('/', async (req, res) => {
 
         const { id, name, colour, total_quantity, balance_quantity, Rack_no, Size, bulk_retail } = value;
 
+        const connection = await pool.getConnection(); // Get a connection from the pool
+
         // Insert the validated data into the database
-        const [result] = await db.promise().query(`
+        await connection.query(`
             INSERT INTO Stock (id, name, colour, total_quantity, balance_quantity, Rack_no, Size, bulk_retail) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [id, name, colour, total_quantity, balance_quantity, Rack_no, Size, bulk_retail]
         );
 
+        connection.release(); // Release the connection back to the pool
         res.status(201).json("Successfully added item");
-
     } catch (error) {
-        console.log("Error adding item:", error);
+        console.error("Error adding item:", error);
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
@@ -46,10 +48,12 @@ router.post('/', async (req, res) => {
 // Route to get all items in stock
 router.get('/', async (req, res) => {
     try {
-        const [result] = await db.promise().query('SELECT * FROM Stock');
+        const connection = await pool.getConnection();
+        const [result] = await connection.query('SELECT * FROM Stock');
+        connection.release();
         res.status(200).json(result);
     } catch (error) {
-        console.log("Error while fetching items: ", error);
+        console.error("Error while fetching items:", error);
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
@@ -62,14 +66,17 @@ router.delete('/:id', async (req, res) => {
             return res.status(400).json({ msg: "Invalid item ID" });
         }
 
-        const [result] = await db.promise().query(`DELETE FROM Stock WHERE id=?`, [itemID]);
+        const connection = await pool.getConnection();
+        const [result] = await connection.query(`DELETE FROM Stock WHERE id=?`, [itemID]);
+        connection.release();
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ msg: "Item not found in stock" });
         }
 
         res.status(200).json({ msg: `Successfully deleted the item with id: ${itemID}` });
     } catch (error) {
-        console.log("Error deleting the item:", error);
+        console.error("Error deleting the item:", error);
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
@@ -120,17 +127,18 @@ router.put('/:id', async (req, res) => {
 
         params.push(id); // Add the item ID for the WHERE clause
 
+        const connection = await pool.getConnection();
         const query = `UPDATE Stock SET ${updates.join(', ')} WHERE id = ?`;
-        const [result] = await db.promise().query(query, params);
+        const [result] = await connection.query(query, params);
+        connection.release();
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ msg: 'Stock item not found' });
         }
 
         res.status(200).json({ msg: 'Stock item updated successfully' });
-
-    } catch (err) {
-        console.error('Error updating stock item:', err);
+    } catch (error) {
+        console.error('Error updating stock item:', error);
         res.status(500).json({ msg: 'Internal server error' });
     }
 });

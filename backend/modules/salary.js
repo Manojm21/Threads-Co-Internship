@@ -1,41 +1,55 @@
-const express = require('express')
-const router = express.Router()
-const db = require('./db')
-const joi = require('joi')
+const express = require('express');
+const router = express.Router();
+const pool = require('./db'); // Use the pool instead of db
+const joi = require('joi');
 
 router.get('/:id/:month/:year', async (req, res) => {
     const today = new Date();
     const curr_month = req.params.month;
     const curr_year = req.params.year;
-    const valuesp = [req.params.id, 'Present', curr_month]
-    const valuesa = [req.params.id, 'Absent', curr_month]
-    const valueso = [req.params.id, 'On Leave', curr_month]
-    const valuesh = [req.params.id, 'Holiday', curr_month]
-    const query = 'SELECT COUNT(date) FROM Attendance WHERE employee_id=? AND STATUS =? AND MONTH(date)=?'
-    const [pd] = await db.promise().query(query, valuesp);
-    const [ad] = await db.promise().query(query, valuesa);
-    const [od] = await db.promise().query(query, valueso);
-    const [hd] = await db.promise().query(query, valuesh);
-    const [salary] = await db.promise().query(`SELECT salary FROM Employees WHERE employee_id = ?`, [req.params.id]);
-    console.log(salary[0]["salary"]);
-    const sal = parseFloat(salary[0]["salary"]);
-    pdn = parseInt(pd[0]["COUNT(date)"]);
-    adn = parseInt(ad[0]["COUNT(date)"]);
-    odn = parseInt(od[0]["COUNT(date)"]);
-    hdn = parseInt(hd[0]["COUNT(date)"]);
-    const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
-    // console.log(parseInt(daysInMonth(today.getFullYear(), curr_month)))
-    
-    if (pdn + adn + odn + hdn != daysInMonth(curr_year, curr_month)) {
-        res.status(400).json({
-            msg: "Premature checking for salary"
-        })
-    }
-    else {
-        const netSalary = sal - (sal / (daysInMonth(curr_year, curr_month))) * adn;
-        res.status(201).json({ payableSalary: netSalary.toFixed(2) });
-    }
+    const valuesp = [req.params.id, 'Present', curr_month];
+    const valuesa = [req.params.id, 'Absent', curr_month];
+    const valueso = [req.params.id, 'On Leave', curr_month];
+    const valuesh = [req.params.id, 'Holiday', curr_month];
+    const query = 'SELECT COUNT(date) AS count FROM Attendance WHERE employee_id=? AND STATUS =? AND MONTH(date)=?';
 
-})
+    try {
+        const connection = await pool.getConnection(); // Get a connection from the pool
+
+        // Fetch attendance data
+        const [pd] = await connection.query(query, valuesp);
+        const [ad] = await connection.query(query, valuesa);
+        const [od] = await connection.query(query, valueso);
+        const [hd] = await connection.query(query, valuesh);
+
+        // Fetch salary details
+        const [salary] = await connection.query(`SELECT salary FROM Employees WHERE employee_id = ?`, [req.params.id]);
+        connection.release(); // Release the connection back to the pool
+
+        if (!salary.length) {
+            return res.status(404).json({ msg: 'Employee not found' });
+        }
+
+        const sal = parseFloat(salary[0].salary);
+        const pdn = parseInt(pd[0].count, 10);
+        const adn = parseInt(ad[0].count, 10);
+        const odn = parseInt(od[0].count, 10);
+        const hdn = parseInt(hd[0].count, 10);
+
+        // Calculate days in the current month
+        const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
+
+        if (pdn + adn + odn + hdn !== daysInMonth(curr_year, curr_month)) {
+            return res.status(400).json({ msg: 'Premature checking for salary' });
+        }
+
+        const netSalary = sal - (sal / daysInMonth(curr_year, curr_month)) * adn;
+        res.status(201).json({ payableSalary: netSalary.toFixed(2) });
+
+    } catch (error) {
+        console.error('Error calculating salary:', error);
+        res.status(500).json({ msg: 'Internal Server Error' });
+    }
+});
 
 module.exports = router;
