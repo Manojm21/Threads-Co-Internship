@@ -26,25 +26,28 @@ router.post('/', async (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
 
-        const [rows] = await db.promise().query('SELECT * FROM login WHERE EMAIL = ?', [email]);
+        const connection = await db.getConnection(); // Get a connection from the pool
+        const [rows] = await connection.query('SELECT * FROM login WHERE EMAIL = ?', [email]);
+
         if (rows.length > 0) {
+            connection.release();
             return res.status(409).json({ msg: 'Email is already taken' });
         }
 
         const hash = await bcrypt.hash(password, 10);
-
-        await db.promise().query('INSERT INTO login (EMAIL, PASSWORD) VALUES (?, ?)', [email, hash]);
+        await connection.query('INSERT INTO login (EMAIL, PASSWORD) VALUES (?, ?)', [email, hash]);
+        connection.release();
 
         req.session.user = { email: email };
         req.session.isLoggedIn = true;
 
         res.cookie('sessionId', req.session.id, { httpOnly: true });
-
         res.status(201).json({ success: true, msg: 'User registered successfully!' });
     } catch (error) {
         console.error('Error during registration:', error);
         res.status(500).json({ msg: 'Internal Server Error' });
     }
 });
+
 
 module.exports = router;

@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const router = express.Router();
-const db = require('./db');
+const db = require('./db'); // Use the updated pool
 const Joi = require('joi');
 
 router.use(session({
@@ -26,7 +26,10 @@ router.post('/', async (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
 
-        const [rows] = await db.promise().query('SELECT * FROM login WHERE EMAIL = ?', [email]);
+        const connection = await db.getConnection(); // Get a connection from the pool
+        const [rows] = await connection.query('SELECT * FROM login WHERE EMAIL = ?', [email]);
+        connection.release(); // Always release the connection
+
         if (rows.length === 0) {
             return res.status(404).json({ msg: 'User not found' });
         }
