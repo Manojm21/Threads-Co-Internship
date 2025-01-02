@@ -45,6 +45,8 @@ const Employees = () => {
         gender: '',
         phone_number: 0,
         role: '',
+        address : '', 
+        aadhar_number : '',
         date_of_joining: '',
         salary: 0,
         advance: 0,
@@ -60,7 +62,7 @@ const Employees = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance || !newemployee.notes) {
+    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.address||!newemployee.aadhar_number || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance || !newemployee.notes ) {
       showAlert('Please fill in all fields correctly.','warning');
       return;
     }
@@ -75,6 +77,8 @@ const Employees = () => {
           gender: '',
           phone_number: 0,
           role: '',
+          address : '', 
+          aadhar_number : '',
           date_of_joining: '',
           salary: 0,
           advance: 0,
@@ -187,6 +191,8 @@ const Employees = () => {
             <th>Name</th>
             <th>Gender</th>
             <th>Role</th>
+            <th>Address</th>
+            <th>Aadhar Number</th>
             <th>Salary & Advance</th>
             <th>Actions</th>
                        
@@ -207,10 +213,12 @@ const Employees = () => {
               <td>{item.name}</td>
               <td>{item.gender}</td>
               <td>{item.role}</td>
+              <td>{item.address}</td>
+              <td>{item.aadhar_number}</td>
               <td>
-  <div>Salary: Rs {item.salary}</div>
-  <div>Advance: Rs {item.advance}</div>
-</td>
+              <div>Salary: Rs {item.salary}</div>
+              <div>Advance: Rs {item.advance}</div>
+            </td>
 
                   <td>
                     <Button variant="warning" onClick={() => handleShow(item)}>
@@ -347,6 +355,38 @@ const Employees = () => {
                     : setNewEmployee({ ...newemployee, role: e.target.value })
                 }
               />
+
+            </Form.Group>
+              <Form.Group controlId="formDOJ">
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter the address"
+                value={editemployee ? editemployee.address : newemployee.address}
+                onChange={(e) =>
+                  editemployee
+                    ? setEditemployee({ ...editemployee, address: e.target.value })
+                    : setNewEmployee({ ...newemployee, address: e.target.value })
+                }
+              />
+
+              </Form.Group>
+              <Form.Group controlId="formDOJ">
+              <Form.Label>Aadhar_number(12 Digit)</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter the address"
+                value={editemployee ? editemployee.aadhar_number : newemployee.aadhar_number}
+                onChange={(e) =>
+                  editemployee
+                    ? setEditemployee({ ...editemployee, aadhar_number: e.target.value })
+                    : setNewEmployee({ ...newemployee, aadhar_number: e.target.value })
+                }
+              />  
+
+
+
+
             </Form.Group>
             <Form.Group controlId="formDOJ">
               <Form.Label>Date Of Joining</Form.Label>
