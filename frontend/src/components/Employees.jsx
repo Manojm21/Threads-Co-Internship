@@ -40,7 +40,7 @@ const Employees = () => {
     }
     else {
       setNewEmployee({
-        employee_id: '',
+        employee_id: 0,
         name: '',
         gender: '',
         phone_number: 0,
@@ -72,7 +72,7 @@ const Employees = () => {
       .then(() => {
         setEmployees([...employees, newemployee]); // Update state with the new item
         setNewEmployee({
-          employee_id: '',
+          employee_id: 0,
           name: '',
           gender: '',
           phone_number: 0,
@@ -375,7 +375,7 @@ const Employees = () => {
               <Form.Label>Aadhar_number(12 Digit)</Form.Label>
               <Form.Control
                 type="number"
-                placeholder="Enter the address"
+                placeholder="Enter the aadhar number"
                 value={editemployee ? editemployee.aadhar_number : newemployee.aadhar_number}
                 onChange={(e) =>
                   editemployee

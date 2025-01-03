@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
         }
 
         const {
-            name, gender, phone_number, role, address, aadhar_number,
+            employee_id, name, gender, phone_number, role, address, aadhar_number,
             date_of_joining, salary, advance, notes
         } = value;
 
@@ -52,9 +52,9 @@ router.post('/', async (req, res) => {
 
         try {
             const [result] = await connection.query(
-                `INSERT INTO Employees (name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance, notes) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance, notes]
+                `INSERT INTO Employees (employee_id, name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance, notes) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [employee_id, name, gender, phone_number, role, address, aadhar_number, date_of_joining, salary, advance, notes]
             );
             res.status(201).json({ msg: "Successfully added employee", empID: result.insertId });
         } finally {
