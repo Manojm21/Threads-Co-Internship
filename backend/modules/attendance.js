@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('./db'); // Updated to use connection pool
 const joi = require('joi');
 
-// Schema for validating attendance data
 const schema = joi.object({
   employee_id: joi.number().integer().required(),
   status: joi.string().valid('Present', 'Absent', 'Holiday', 'On Leave').required(),
@@ -12,76 +11,109 @@ const schema = joi.object({
 // Middleware to parse JSON
 router.use(express.json());
 
-router.route('/')
-  .get(async (req, res) => {
+// Fetch attendance for any selected date
+router.get('/date/:date', async (req, res) => {
+  try {
+    const { date } = req.params;
+    const connection = await db.getConnection();
+
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const connection = await db.getConnection();
+      const query = 'SELECT employee_id, status FROM Attendance WHERE date = ?';
+      const [attendanceData] = await connection.query(query, [date]);
 
-      try {
-        // Fetch employee data
-        const [employees] = await connection.query('SELECT employee_id, name FROM Employees');
-
-        // Check if today's attendance is recorded
-        const [attendance] = await connection.query(
-          'SELECT COUNT(*) AS count FROM Attendance WHERE date = ?',
-          [today]
-        );
-
-        const attendanceRecorded = attendance[0].count > 0;
-
-        res.status(200).json({ employees, attendanceRecorded });
-      } finally {
-        connection.release(); // Always release the connection
-      }
-    } catch (error) {
-      console.error('Error fetching attendance data:', error);
-      res.status(500).json({ message: 'Error fetching attendance data' });
+      res.status(200).json({ attendanceData });
+    } finally {
+      connection.release();
     }
-  })
-  .post(async (req, res) => {
+  } catch (error) {
+    console.error('Error fetching attendance data for selected date:', error);
+    res.status(500).json({ message: 'Error fetching attendance data for selected date' });
+  }
+});
+
+// Record or update attendance for today or any selected date
+router.post('/', async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // Default to today's date
+    const attendanceData = req.body.attendance;
+
+    const errors = [];
+    const query = 'INSERT INTO Attendance (employee_id, date, status) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?';
+    const connection = await db.getConnection();
+
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const attendanceData = req.body.attendance;
-
-      const errors = [];
-      const query = 'INSERT INTO Attendance (employee_id, date, status) VALUES (?, ?, ?)';
-      const connection = await db.getConnection();
-
-      try {
-        for (const record of attendanceData) {
-          const { error } = schema.validate(record);
-          if (error) {
-            errors.push({ employee_id: record.employee_id, error: error.message });
-            continue;
-          }
-
-          try {
-            await connection.query(query, [record.employee_id, today, record.status]);
-          } catch (err) {
-            if (err.code === 'ER_DUP_ENTRY') {
-              return res
-                .status(400)
-                .json({ message: 'Attendance already recorded for this employee today' });
-            }
-            throw err;
-          }
+      for (const record of attendanceData) {
+        const { error } = schema.validate(record);
+        if (error) {
+          errors.push({ employee_id: record.employee_id, error: error.message });
+          continue;
         }
 
-        if (errors.length > 0) {
-          res.status(400).json({ message: 'Validation errors in some records', errors });
-        } else {
-          res.status(201).json({ message: 'Attendance recorded successfully' });
+        const status = record.status || 'Absent'; // Default status is "Absent"
+        try {
+          await connection.query(query, [record.employee_id, today, status, status]);
+        } catch (err) {
+          console.error('Error inserting/updating attendance:', err);
+          throw err;
         }
-      } finally {
-        connection.release(); // Always release the connection
       }
-    } catch (error) {
-      console.error('Error recording attendance:', error);
-      res.status(500).json({ message: 'Error recording attendance' });
-    }
-  });
 
+      if (errors.length > 0) {
+        res.status(400).json({ message: 'Validation errors in some records', errors });
+      } else {
+        res.status(201).json({ message: 'Attendance recorded/updated successfully' });
+      }
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error recording/updating attendance:', error);
+    res.status(500).json({ message: 'Error recording/updating attendance' });
+  }
+});
+
+// Edit attendance for any selected date
+router.put('/date/:date', async (req, res) => {
+  try {
+    const { date } = req.params;
+    const attendanceData = req.body.attendance;
+
+    const errors = [];
+    const query = 'INSERT INTO Attendance (employee_id, date, status) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?';
+    const connection = await db.getConnection();
+
+    try {
+      for (const record of attendanceData) {
+        const { error } = schema.validate(record);
+        if (error) {
+          errors.push({ employee_id: record.employee_id, error: error.message });
+          continue;
+        }
+
+        const status = record.status || 'Absent'; // Default status is "Absent"
+        try {
+          await connection.query(query, [record.employee_id, date, status, status]);
+        } catch (err) {
+          console.error('Error inserting/updating attendance:', err);
+          throw err;
+        }
+      }
+
+      if (errors.length > 0) {
+        res.status(400).json({ message: 'Validation errors in some records', errors });
+      } else {
+        res.status(200).json({ message: 'Attendance updated successfully' });
+      }
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error updating attendance for selected date:', error);
+    res.status(500).json({ message: 'Error updating attendance for selected date' });
+  }
+});
+
+// Fetch monthly attendance summary
 router.get('/:month', async (req, res) => {
   try {
     const month = req.params.month;
@@ -125,7 +157,7 @@ router.get('/:month', async (req, res) => {
 
       res.status(200).json(summary);
     } finally {
-      connection.release(); // Always release the connection
+      connection.release();
     }
   } catch (error) {
     console.error('Error fetching attendance summary:', error);

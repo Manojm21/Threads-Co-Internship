@@ -9,15 +9,17 @@ import { showAlert } from '../utils/alertUtils'; // Ensure this utility is imple
 const Attendance = () => {
   const [employees, setEmployees] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
-  const [month, setMonth] = useState('');
+  const [selectedDate, setSelectedDate] = useState(currentDate);
   const [monthSummary, setMonthSummary] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [attendanceRecorded, setAttendanceRecorded] = useState(false);
   const [isHoliday, setIsHoliday] = useState(false);
-  const [canEditAttendance, setCanEditAttendance] = useState(true); // New state for editing permission
+  const [canEditAttendance, setCanEditAttendance] = useState(false); // Initially not editable
+  const [isEditMode, setIsEditMode] = useState(false); // Track whether we're in edit mode
 
   const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
+  // Fetch all employees
   useEffect(() => {
     axios
       .get(`${CONFIG.BACKEND_URL}/attendance`)
@@ -40,18 +42,26 @@ const Attendance = () => {
       });
   }, []);
 
+  // Fetch attendance for the selected date
   useEffect(() => {
-    if (month) {
-      const monthNumber = month.split('-')[1];
+    if (selectedDate) {
       axios
-        .get(`${CONFIG.BACKEND_URL}/attendance/${monthNumber}`)
-        .then((response) => setMonthSummary(response.data))
+        .get(`${CONFIG.BACKEND_URL}/attendance/${selectedDate}`)
+        .then((response) => {
+          const { attendance, monthSummary } = response.data;
+          const updatedAttendanceData = attendance.reduce((acc, record) => {
+            acc[record.employee_id] = record.status;
+            return acc;
+          }, {});
+          setAttendanceData(updatedAttendanceData);
+          setMonthSummary(monthSummary || {});
+        })
         .catch((error) => {
-          console.error('Error fetching month summary:', error);
-          showAlert('Failed to fetch monthly attendance summary.', 'danger');
+          console.error('Error fetching attendance:', error);
+          showAlert('Failed to fetch attendance for the selected date.', 'danger');
         });
     }
-  }, [month]);
+  }, [selectedDate]);
 
   // Handle attendance change (present, absent, holiday)
   const handleAttendanceChange = (employeeId, status) => {
@@ -76,7 +86,6 @@ const Attendance = () => {
     axios
       .post(`${CONFIG.BACKEND_URL}/attendance`, payload)
       .then(() => {
-        // showAlert('Attendance submitted successfully!', 'success');
         setAttendanceRecorded(true);
         setAttendanceData({});
       })
@@ -88,8 +97,8 @@ const Attendance = () => {
       });
   };
 
-  const handleMonthChange = (e) => {
-    setMonth(e.target.value);
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
   };
 
   const handleSearchChange = (e) => {
@@ -111,16 +120,18 @@ const Attendance = () => {
     setAttendanceData(holidayAttendance);
   };
 
-  // Check if attendance can be edited (only for today)
-  useEffect(() => {
-    if (attendanceRecorded) {
-      const attendanceDate = new Date(currentDate);
-      const today = new Date().toISOString().split('T')[0];
-      if (today !== currentDate) {
-        setCanEditAttendance(false); // Disable editing if it's not the present day
-      }
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode); // Toggle the edit mode
+    if (!isEditMode) {
+      // When switching to edit mode, you may want to set all attendance as 'Absent' by default
+      const editableAttendance = employees.reduce((acc, employee) => {
+        acc[employee.employee_id] = attendanceData[employee.employee_id] || 'Absent';
+        return acc;
+      }, {});
+      setAttendanceData(editableAttendance);
     }
-  }, [attendanceRecorded]);
+  };
 
   return (
     <div className="container mt-4 zindex-1">
@@ -130,7 +141,7 @@ const Attendance = () => {
       {attendanceRecorded && (
         <AutoDismissAlert
           variant="success"
-          message={`Attendance for today (${currentDate}) has already been recorded.`}
+          message={`Attendance for ${selectedDate} has already been recorded.`}
           duration={3000}
         />
       )}
@@ -147,9 +158,9 @@ const Attendance = () => {
         <Button
           variant="primary"
           onClick={handleSubmitAttendance}
-          disabled={attendanceRecorded || !isAttendanceComplete()}
+          disabled={isEditMode ? false : !isAttendanceComplete()}
         >
-          Submit Attendance
+          {isEditMode ? 'Update Attendance' : 'Submit Attendance'}
         </Button>
         <Form.Check
           type="checkbox"
@@ -157,12 +168,22 @@ const Attendance = () => {
           onChange={handleHolidayChange}
           label="Today is Holiday"
         />
+        
+        {/* Datepicker for attendance date */}
         <Form.Control
-          type="month"
-          value={month}
-          onChange={handleMonthChange}
+          type="date"
+          value={selectedDate}
+          onChange={handleDateChange}
           style={{ width: '200px' }}
         />
+
+        <Button
+          variant="secondary"
+          onClick={toggleEditMode}
+          className="ml-2"
+        >
+          {isEditMode ? 'Cancel Edit' : 'Edit Attendance'}
+        </Button>
       </div>
 
       <Table striped bordered hover responsive>
@@ -180,20 +201,23 @@ const Attendance = () => {
               <td>{employee.employee_id}</td>
               <td>{employee.name}</td>
               <td>
-                {['Present', 'Absent', 'Holiday'].map((status) => (
-                  <Form.Check
-                    type="radio"
-                    label={status}
-                    name={`attendance-${employee.employee_id}`}
-                    value={status}
-                    checked={attendanceData[employee.employee_id] === status}
-                    onChange={() =>
-                      handleAttendanceChange(employee.employee_id, status)
-                    }
-                    key={status}
-                    disabled={!canEditAttendance} // Disable editing if attendance can't be edited
-                  />
-                ))}
+                {isEditMode ? (
+                  ['Present', 'Absent', 'Holiday'].map((status) => (
+                    <Form.Check
+                      type="radio"
+                      label={status}
+                      name={`attendance-${employee.employee_id}`}
+                      value={status}
+                      checked={attendanceData[employee.employee_id] === status}
+                      onChange={() =>
+                        handleAttendanceChange(employee.employee_id, status)
+                      }
+                      key={status}
+                    />
+                  ))
+                ) : (
+                  <span>{attendanceData[employee.employee_id]}</span>
+                )}
               </td>
               <td>
                 {monthSummary[employee.employee_id] ? (
