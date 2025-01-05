@@ -10,10 +10,10 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // axios
-    //   .post(`${CONFIG.BACKEND_URL}/logout`)
-    //   .then(() => { showAlert('User logout successfully','success') })
-    //   .catch((err) => { console.log("Error logging user out:", err) })
+    axios
+    .post(`${CONFIG.BACKEND_URL}/logout`, {}, { withCredentials: true })
+    .then(() => { showAlert('User logout successfully', 'success') })
+    .catch((err) => { console.log("Error logging user out:", err) });
     navigate('/login')
   };
 

@@ -1,11 +1,20 @@
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const router = express.Router();
+
+router.use(cors(
+    {
+        origin: 'https://threadsandco-erp-frontend.onrender.com/',
+        credentials: true
+    }
+))
 
 router.use(session({
     secret: 'wasssssuppp',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    name: 'sessionId'
 }));
 
 router.post('/', (req, res) => {
