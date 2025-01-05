@@ -9,7 +9,7 @@ router.get('/:id/:month/:year', async (req, res) => {
     const curr_year = req.params.year;
     const valuesp = [req.params.id, 'Present', curr_month];
     const valuesa = [req.params.id, 'Absent', curr_month];
-    const valueso = [req.params.id, 'On Leave', curr_month];
+    const valueshd = [req.params.id, 'Half Day', curr_month];
     const valuesh = [req.params.id, 'Holiday', curr_month];
     const query = 'SELECT COUNT(date) AS count FROM Attendance WHERE employee_id=? AND STATUS =? AND MONTH(date)=?';
 
@@ -19,7 +19,7 @@ router.get('/:id/:month/:year', async (req, res) => {
         // Fetch attendance data
         const [pd] = await connection.query(query, valuesp);
         const [ad] = await connection.query(query, valuesa);
-        const [od] = await connection.query(query, valueso);
+        const [hdd] = await connection.query(query, valueshd);
         const [hd] = await connection.query(query, valuesh);
 
         // Fetch salary details
@@ -33,17 +33,17 @@ router.get('/:id/:month/:year', async (req, res) => {
         const sal = parseFloat(salary[0].salary);
         const pdn = parseInt(pd[0].count, 10);
         const adn = parseInt(ad[0].count, 10);
-        const odn = parseInt(od[0].count, 10);
+        const hddn = parseInt(hdd[0].count, 10);
         const hdn = parseInt(hd[0].count, 10);
 
         // Calculate days in the current month
         const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
 
-        if (pdn + adn + odn + hdn !== daysInMonth(curr_year, curr_month)) {
+        if (pdn + adn + hddn + hdn !== daysInMonth(curr_year, curr_month)) {
             return res.status(400).json({ msg: 'Premature checking for salary' });
         }
 
-        const netSalary = sal - (sal / daysInMonth(curr_year, curr_month)) * adn;
+        const netSalary = sal - (sal / daysInMonth(curr_year, curr_month)) * adn - (sal / daysInMonth(curr_year, curr_month)) * 0.5 * hddn;
         res.status(201).json({ payableSalary: netSalary.toFixed(2) });
 
     } catch (error) {

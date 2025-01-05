@@ -5,7 +5,7 @@ const joi = require('joi');
 
 const schema = joi.object({
   employee_id: joi.number().integer().required(),
-  status: joi.string().valid('Present', 'Absent', 'Holiday', 'On Leave').required(),
+  status: joi.string().valid('Present', 'Absent', 'Holiday', 'Half Day').required(),
 });
 
 // Middleware to parse JSON
@@ -135,7 +135,7 @@ router.get('/:month', async (req, res) => {
       const summary = {};
       rows.forEach((row) => {
         if (!summary[row.employee_id]) {
-          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, onleave: 0 };
+          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, halfDay: 0 };
         }
         switch (row.status.toLowerCase()) {
           case 'present':
@@ -147,8 +147,8 @@ router.get('/:month', async (req, res) => {
           case 'holiday':
             summary[row.employee_id].holidays = row.count;
             break;
-          case 'on leave':
-            summary[row.employee_id].onleave = row.count;
+          case 'half day':
+            summary[row.employee_id].halfDay = row.count;
             break;
           default:
             break;

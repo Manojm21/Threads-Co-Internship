@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import tcLogo from '../assets/image.png';
 import axios from 'axios';
 import CONFIG from '../config';
@@ -7,14 +7,15 @@ import { showAlert } from '../utils/alertUtils'; // Ensure this utility is imple
 
 
 const Navbar = () => {
-  const navigate = useNavigate();
 
   const handleLogout = () => {
-    // axios
-    //   .post(`${CONFIG.BACKEND_URL}/logout`)
-    //   .then(() => { showAlert('User logout successfully','success') })
-    //   .catch((err) => { console.log("Error logging user out:", err) })
-    navigate('/login')
+    axios
+    .post(`${CONFIG.BACKEND_URL}/logout`)
+    .then(() => { 
+      showAlert('User logout successfully', 'success') 
+      window.location.href = '/login';
+    })
+    .catch((err) => { console.log("Error logging user out:", err) });
   };
 
   return (

@@ -1,11 +1,13 @@
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const router = express.Router();
 
 router.use(session({
     secret: 'wasssssuppp',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    name: 'sessionId'
 }));
 
 router.post('/', (req, res) => {
@@ -23,7 +25,6 @@ router.post('/', (req, res) => {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.set('Pragma', 'no-cache');
             res.set('Expires', '0');
-
             return res.status(200).json({ msg: 'Logout successful!' });
         });
     } else {

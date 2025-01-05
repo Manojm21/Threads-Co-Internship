@@ -201,30 +201,27 @@ const Attendance = () => {
               <td>{employee.employee_id}</td>
               <td>{employee.name}</td>
               <td>
-                {isEditMode ? (
-                  ['Present', 'Absent', 'Holiday'].map((status) => (
-                    <Form.Check
-                      type="radio"
-                      label={status}
-                      name={`attendance-${employee.employee_id}`}
-                      value={status}
-                      checked={attendanceData[employee.employee_id] === status}
-                      onChange={() =>
-                        handleAttendanceChange(employee.employee_id, status)
-                      }
-                      key={status}
-                    />
-                  ))
-                ) : (
-                  <span>{attendanceData[employee.employee_id]}</span>
-                )}
+                {['Present', 'Absent','Half Day', 'Holiday'].map((status) => (
+                  <Form.Check
+                    type="radio"
+                    label={status}
+                    name={`attendance-${employee.employee_id}`}
+                    value={status}
+                    checked={attendanceData[employee.employee_id] === status}
+                    onChange={() =>
+                      handleAttendanceChange(employee.employee_id, status)
+                    }
+                    key={status}
+                    disabled={!canEditAttendance} // Disable editing if attendance can't be edited
+                  />
+                ))}
               </td>
               <td>
                 {monthSummary[employee.employee_id] ? (
                   <>
                     <div>Present: {monthSummary[employee.employee_id].present}</div>
                     <div>Absent: {monthSummary[employee.employee_id].absent}</div>
-                    <div>Leave: {monthSummary[employee.employee_id].onleave}</div>
+                    <div>Half Day: {monthSummary[employee.employee_id].halfDay}</div>
                     <div>Holiday: {monthSummary[employee.employee_id].holidays}</div>
                   </>
                 ) : (
