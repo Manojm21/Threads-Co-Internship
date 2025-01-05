@@ -4,12 +4,26 @@ const session = require('express-session');
 const router = express.Router();
 const db = require('./db'); // Use the updated pool
 const Joi = require('joi');
+const cors = require('cors');
+
+const corsOptions = {
+    origin: 'https://threadsandco-erp-frontend.onrender.com/', // Your frontend URL
+    credentials: true,  // Allow cookies and credentials
+};
+
+router.use(cors(corsOptions));
 
 router.use(session({
     secret: 'wasssssuppp',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false
+    }
 }));
+
+router.options('*', cors(corsOptions)); // Allow preflight for all routes
 
 const loginSchema = Joi.object({
     email: Joi.string().email().required(),
