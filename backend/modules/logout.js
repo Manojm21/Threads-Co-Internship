@@ -3,13 +3,6 @@ const cors = require('cors');
 const session = require('express-session');
 const router = express.Router();
 
-router.use(cors(
-    {
-        origin: 'https://threadsandco-erp-frontend.onrender.com/',
-        credentials: true
-    }
-))
-
 router.use(session({
     secret: 'wasssssuppp',
     resave: false,
@@ -32,7 +25,6 @@ router.post('/', (req, res) => {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.set('Pragma', 'no-cache');
             res.set('Expires', '0');
-
             return res.status(200).json({ msg: 'Logout successful!' });
         });
     } else {
