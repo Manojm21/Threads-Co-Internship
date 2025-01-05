@@ -6,12 +6,12 @@ const db = require('./db'); // Use the updated pool
 const Joi = require('joi');
 const cors = require('cors');
 
-const corsOptions = {
-    origin: 'https://threadsandco-erp-frontend.onrender.com/', // Your frontend URL
-    credentials: true,  // Allow cookies and credentials
-};
+// const corsOptions = {
+//     origin: 'https://threadsandco-erp-frontend.onrender.com/', // Your frontend URL
+//     credentials: true,  // Allow cookies and credentials
+// };
 
-router.use(cors(corsOptions));
+// router.use(cors(corsOptions));
 
 router.use(session({
     secret: 'wasssssuppp',
@@ -23,7 +23,7 @@ router.use(session({
     }
 }));
 
-router.options('*', cors(corsOptions)); // Allow preflight for all routes
+// router.options('*', cors(corsOptions)); // Allow preflight for all routes
 
 const loginSchema = Joi.object({
     email: Joi.string().email().required(),
