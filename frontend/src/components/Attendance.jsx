@@ -7,6 +7,7 @@ import AutoDismissAlert from '../components/AutoDismissAlert'; // Import the uti
 import { showAlert } from '../utils/alertUtils'; // Ensure this utility is implemented
 
 const Attendance = () => {
+  const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
   const [employees, setEmployees] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedDate, setSelectedDate] = useState(currentDate);
@@ -17,7 +18,6 @@ const Attendance = () => {
   const [canEditAttendance, setCanEditAttendance] = useState(false); // Initially not editable
   const [isEditMode, setIsEditMode] = useState(false); // Track whether we're in edit mode
 
-  const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
   // Fetch all employees
   useEffect(() => {

@@ -4,7 +4,7 @@ import 'bootswatch/dist/lux/bootstrap.min.css';
 import axios from 'axios';
 import CONFIG from '../config';
 
-const ATTENDANCE_STATUSES = ['Present', 'Absent', 'Holiday'];
+const ATTENDANCE_STATUSES = ['Present', 'Absent', 'Holiday', 'Half Day'];
 
 const Attendance = () => {
   // State Management
@@ -29,7 +29,7 @@ const Attendance = () => {
 
   const fetchEmployees = useCallback(async () => {
     try {
-      const response = await axios.get(`${CONFIG.BACKEND_URL}/attendance`);
+      const response = await axios.get(`${CONFIG.BACKEND_URL}/newattendance`);
       console.log('Response data:', response.data);  // Debugging
       const fetchedEmployees = response.data.employees || [];
       setEmployees(fetchedEmployees);
@@ -56,7 +56,7 @@ const Attendance = () => {
     if (!specificDate) return;
 
     try {
-      const response = await axios.get(`${CONFIG.BACKEND_URL}/attendance`, {
+      const response = await axios.get(`${CONFIG.BACKEND_URL}/newattendance`, {
         params: { date: specificDate }
       });
 
@@ -71,12 +71,13 @@ const Attendance = () => {
 
   // Calculate monthly summary
   const calculateMonthlySummary = (attendanceData) => {
-    const summary = { Present: 0, Absent: 0, Holiday: 0 };
+    const summary = { Present: 0, Absent: 0, HalfDay: 0, Holiday: 0 };
 
     Object.values(attendanceData).forEach(status => {
       if (status === 'Present') summary.Present++;
       else if (status === 'Absent') summary.Absent++;
       else if (status === 'Holiday') summary.Holiday++;
+      else if (status === 'Half Day') summary.HalfDay++;
     });
 
     setMonthSummary(summary);
@@ -106,7 +107,7 @@ const Attendance = () => {
       console.log('Submitting payload:', payload);  // Debugging
   
       // Make a POST request to submit the attendance
-      await axios.post(`${CONFIG.BACKEND_URL}/attendance`, payload);
+      await axios.post(`${CONFIG.BACKEND_URL}/newattendance`, payload);
       showAlert('Attendance submitted successfully!', 'success');
       setIsEditing(false);
       fetchSpecificDayAttendance(); // Refresh data after submission
@@ -206,7 +207,7 @@ const Attendance = () => {
                   <>
                     <div>Present: {monthSummary[employee.employee_id].present}</div>
                     <div>Absent: {monthSummary[employee.employee_id].absent}</div>
-                    <div>Leave: {monthSummary[employee.employee_id].onleave}</div>
+                    <div>Half Day: {monthSummary[employee.employee_id].halfday}</div>
                     <div>Holiday: {monthSummary[employee.employee_id].holidays}</div>
                   </>
                 ) : (

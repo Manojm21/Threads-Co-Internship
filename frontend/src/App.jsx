@@ -7,6 +7,7 @@ import Register from './components/Register';
 import Stock from './components/Stocks';
 import Employees from './components/Employees'; 
 import Attendance from './components/Attendance';
+import NewAttendance from './components/Attendance_new';
 import Flush from './components/Flush';
 import AuthApi from './utils/AuthApi';
 import { useContext, useState } from 'react';
@@ -24,7 +25,8 @@ const App = () => {
             <Route path="/view" element={<RouteProtection><Navbar/><LandingPage /></RouteProtection>} />
             <Route path="/stock" element={<RouteProtection><Navbar/><Stock /></RouteProtection>} />
             <Route path="/employees" element={<RouteProtection><Navbar/><Employees /></RouteProtection>} />
-            <Route path="/attendance" element={<RouteProtection><Navbar/><Attendance /></RouteProtection>} />
+            <Route path="/attendance" element={<RouteProtection><Navbar/><NewAttendance /></RouteProtection>} />
+            <Route path="/newattendance" element={<RouteProtection><Navbar/><NewAttendance /></RouteProtection>} />
             <Route path="/flush" element={<RouteProtection><Navbar/><Flush/></RouteProtection>}/>
             <Route path="/" element={<Dashboard />} />
           </Routes>
