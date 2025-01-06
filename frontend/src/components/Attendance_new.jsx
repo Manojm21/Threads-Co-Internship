@@ -71,13 +71,13 @@ const Attendance = () => {
 
   // Calculate monthly summary
   const calculateMonthlySummary = (attendanceData) => {
-    const summary = { Present: 0, Absent: 0, HalfDay: 0, Holiday: 0 };
+    const summary = { Present: 0, Absent: 0, "Half Day": 0, Holiday: 0 };
 
     Object.values(attendanceData).forEach(status => {
       if (status === 'Present') summary.Present++;
       else if (status === 'Absent') summary.Absent++;
       else if (status === 'Holiday') summary.Holiday++;
-      else if (status === 'Half Day') summary.HalfDay++;
+      else if (status === 'Half Day') summary["Half Day"]++;
     });
 
     setMonthSummary(summary);

@@ -3,12 +3,13 @@ const router = express.Router();
 const db = require('./db'); 
 const joi = require('joi');
 
+const VALID_STATUSES = ['Present', 'Absent', 'Holiday', 'Half Day'];
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 // Joi Schema for validating attendance input
 const schema = joi.object({
   employee_id: joi.number().integer().required(),
-  status: joi.string().valid('Present', 'Absent', 'Holiday').required(), 
+  status: joi.string().valid(...VALID_STATUSES).required(), 
   date: joi.date().optional(),
 });
 
@@ -95,7 +96,7 @@ router.patch('/:employee_id/:date', async (req, res) => {
 
     const { error } = joi.object({
       employee_id: joi.number().integer().required(),
-      status: joi.string().valid('Present', 'Absent', 'Holiday').required(),
+      status: joi.string().valid(...VALID_STATUSES).required(),
       date: joi.date().iso().required(),
     }).validate({ employee_id, status, date });
 
@@ -146,7 +147,7 @@ router.get('/:month', async (req, res) => {
       const summary = {};
       rows.forEach((row) => {
         if (!summary[row.employee_id]) {
-          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, onleave: 0 };
+          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, halfday: 0 };
         }
         switch (row.status.toLowerCase()) {
           case 'present':
@@ -157,6 +158,9 @@ router.get('/:month', async (req, res) => {
             break;
           case 'holiday':
             summary[row.employee_id].holidays = row.count;
+            break;
+          case 'half day':
+            summary[row.employee_id].halfday = row.count;
             break;
          
           default:
