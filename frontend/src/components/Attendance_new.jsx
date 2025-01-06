@@ -16,6 +16,8 @@ const Attendance = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [isHoliday, setIsHoliday] = useState(false);
+  
 
   const showAlert = (message, type) => {
     if (type === 'success') {
@@ -63,25 +65,39 @@ const Attendance = () => {
       setAttendanceData(response.data.attendanceData || {});
       setIsEditing(false);
       showAlert(`Attendance data loaded for ${specificDate}`, 'success');
-      calculateMonthlySummary(response.data.attendanceData);
-    } catch (err) {
+    } 
+    catch (err) {
       showAlert('Error fetching attendance: ' + (err.response?.data?.message || err.message), 'error');
     }
   };
 
-  // Calculate monthly summary
-  const calculateMonthlySummary = (attendanceData) => {
-    const summary = { Present: 0, Absent: 0, "Half Day": 0, Holiday: 0 };
-
-    Object.values(attendanceData).forEach(status => {
-      if (status === 'Present') summary.Present++;
-      else if (status === 'Absent') summary.Absent++;
-      else if (status === 'Holiday') summary.Holiday++;
-      else if (status === 'Half Day') summary["Half Day"]++;
-    });
-
-    setMonthSummary(summary);
+  
+  const handleHolidayChange = () => {
+    setIsHoliday(!isHoliday);
+    const holidayAttendance = employees.reduce((acc, employee) => {
+      acc[employee.employee_id] = isHoliday ? 'Absent' : 'Holiday'; // Toggle between Holiday and Absent
+      return acc;
+    }, {});
+    setAttendanceData(holidayAttendance);
   };
+
+    
+ // Fetch monthly summary when date changes
+useEffect(() => {
+  if (specificDate) {
+    const month = new Date(specificDate).getMonth() + 1; // Get month number (1-12)
+    
+    axios
+      .get(`${CONFIG.BACKEND_URL}/newattendance/${month}`)
+      .then((response) => {
+        setMonthSummary(response.data || {});
+      })
+      .catch((error) => {
+        console.error('Error fetching monthly summary:', error);
+        showAlert('Failed to fetch monthly summary.', 'danger');
+      });
+  }
+}, [specificDate]);
 
   // Handle attendance change
   const handleAttendanceChange = (employeeId, status) => {
@@ -137,38 +153,51 @@ const Attendance = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-100 mb-3"
+          style={{ cursor: 'pointer' }}
         />
 
-        <div className="d-flex gap-3 align-items-center">
-          <Form.Control
-            type="date"
-            value={specificDate}
-            onChange={(e) => setSpecificDate(e.target.value)}
-            max={new Date().toISOString().split('T')[0]}
-          />
-          <Button
-            variant="primary"
-            onClick={fetchSpecificDayAttendance}
-            disabled={!specificDate}
-          >
-            Fetch Attendance
-          </Button>
-          <Button
-            variant={isEditing ? "secondary" : "info"}
-            onClick={() => setIsEditing(!isEditing)}
-            disabled={!specificDate}
-          >
-            {isEditing ? 'Cancel Edit' : 'Edit Attendance'}
-          </Button>
-          {isEditing && (
-            <Button
-              variant="success"
-              onClick={handleSubmitAttendance}
-            >
-              Submit Changes
-            </Button>
-          )}
-        </div>
+<div className="d-flex gap-3 align-items-center">
+  
+    <Form.Control
+      type="date"
+      value={specificDate}
+      onChange={(e) => setSpecificDate(e.target.value)}
+      max={new Date().toISOString().split('T')[0]}
+    />
+  
+  <div className="d-flex align-items-center" style={{ minWidth: '12%' , cursor: 'pointer'}}>
+    <Form.Check
+      type="checkbox"
+      checked={isHoliday}
+      onChange={!isEditing ? undefined : handleHolidayChange}
+      label="Set as Holiday"
+      className="mb-0"
+      
+    />
+  </div>
+  <Button
+    variant="primary"
+    onClick={fetchSpecificDayAttendance}
+    disabled={!specificDate}
+  >
+    Fetch Attendance
+  </Button>
+  <Button
+    variant={isEditing ? "secondary" : "info"}
+    onClick={() => setIsEditing(!isEditing)}
+    disabled={!specificDate}
+  >
+    {isEditing ? 'Cancel Edit' : 'Edit Attendance'}
+  </Button>
+  {isEditing && (
+    <Button
+      variant="success"
+      onClick={handleSubmitAttendance}
+    >
+      Submit Changes
+    </Button>
+  )}
+</div>
       </div>
 
       <Table striped bordered hover responsive>
@@ -198,6 +227,7 @@ const Attendance = () => {
                       checked={attendanceData[employee.employee_id] === status}
                       onChange={() => handleAttendanceChange(employee.employee_id, status)}
                       disabled={!isEditing}
+                      style={{ cursor: isEditing ? 'pointer' : 'default' }}
                     />
                   ))}
                 </div>
@@ -207,7 +237,7 @@ const Attendance = () => {
                   <>
                     <div>Present: {monthSummary[employee.employee_id].present}</div>
                     <div>Absent: {monthSummary[employee.employee_id].absent}</div>
-                    <div>Half Day: {monthSummary[employee.employee_id].halfday}</div>
+                    <div>Half Day: {monthSummary[employee.employee_id].halfDay}</div>
                     <div>Holiday: {monthSummary[employee.employee_id].holidays}</div>
                   </>
                 ) : (

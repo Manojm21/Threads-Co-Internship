@@ -147,7 +147,7 @@ router.get('/:month', async (req, res) => {
       const summary = {};
       rows.forEach((row) => {
         if (!summary[row.employee_id]) {
-          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, halfday: 0 };
+          summary[row.employee_id] = { present: 0, absent: 0, holidays: 0, halfDay: 0 };
         }
         switch (row.status.toLowerCase()) {
           case 'present':
@@ -160,7 +160,7 @@ router.get('/:month', async (req, res) => {
             summary[row.employee_id].holidays = row.count;
             break;
           case 'half day':
-            summary[row.employee_id].halfday = row.count;
+            summary[row.employee_id].halfDay = row.count;
             break;
          
           default:
