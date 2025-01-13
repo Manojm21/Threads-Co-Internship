@@ -45,8 +45,8 @@ const Employees = () => {
         gender: '',
         phone_number: 0,
         role: '',
-        address : '', 
-        aadhar_number : '',
+        address: '',
+        aadhar_number: '',
         date_of_joining: '',
         salary: 0,
         advance: 0,
@@ -62,8 +62,8 @@ const Employees = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.address||!newemployee.aadhar_number || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance || !newemployee.notes ) {
-      showAlert('Please fill in all fields correctly.','warning');
+    if (!newemployee.employee_id || !newemployee.name || !newemployee.gender || !newemployee.phone_number || !newemployee.role || !newemployee.address || !newemployee.aadhar_number || !newemployee.date_of_joining || !newemployee.salary || !newemployee.advance || !newemployee.notes) {
+      showAlert('Please fill in all fields correctly.', 'warning');
       return;
     }
 
@@ -77,14 +77,14 @@ const Employees = () => {
           gender: '',
           phone_number: 0,
           role: '',
-          address : '', 
-          aadhar_number : '',
+          address: '',
+          aadhar_number: '',
           date_of_joining: '',
           salary: 0,
           advance: 0,
           notes: '' // Reset notes field
         });
-        showAlert("Added Employee successfully",'success');
+        showAlert("Added Employee successfully", 'success');
         setShow(false);
       })
       .catch((error) => console.error('Error adding employee:', error));
@@ -97,7 +97,7 @@ const Employees = () => {
         setEmployees((prev) =>
           prev.map((item) => (item.employee_id === editemployee.employee_id ? { ...editemployee } : item))
         );
-        
+
         setEditemployee(null);
         setShow(false);
       })
@@ -124,7 +124,7 @@ const Employees = () => {
 
   const handleGetSalary = () => {
     if (!salaryMonth || !salaryYear) {
-      showAlert('Please enter a valid month and year','warning');
+      showAlert('Please enter a valid month and year', 'warning');
       return;
     }
     axios
@@ -133,13 +133,13 @@ const Employees = () => {
         setSalaryDetails(response.data);
         // showAlert('Salary Fetched Successfully','success');
       })
-      .catch((err)=> {
-        if(err.response.status == 400){
+      .catch((err) => {
+        if (err.response.status == 400) {
           showAlert("The attendance of the employee for the entire month is not available");
           return;
         }
         console.log("Error fetching salary: ", err);
-        showAlert('Failed to fetch the salary of the employee','error');
+        showAlert('Failed to fetch the salary of the employee', 'error');
       })
   }
 
@@ -171,17 +171,17 @@ const Employees = () => {
         style={{ width: '300px', marginBottom: '20px' }}
       />
 
-<div className="d-flex justify-content-between mb-3">
-  {/* Left-aligned Create Employee Button */}
-  <Button variant="primary" onClick={() => handleShow()}>
-    Create Employee
-  </Button>
+      <div className="d-flex justify-content-between mb-3">
+        {/* Left-aligned Create Employee Button */}
+        <Button variant="primary" onClick={() => handleShow()}>
+          Create Employee
+        </Button>
 
-  {/* Right-aligned Toggle Button */}
-  <Button variant="success" onClick={toggleTableExpansion}>
-    {isExpanded ? "View Less" : "View More"}
-  </Button>
-</div>
+        {/* Right-aligned Toggle Button */}
+        <Button variant="success" onClick={toggleTableExpansion}>
+          {isExpanded ? "View Less" : "View More"}
+        </Button>
+      </div>
 
 
       <Table striped bordered hover className="mt-3">
@@ -195,13 +195,13 @@ const Employees = () => {
             <th>Aadhar Number</th>
             <th>Salary & Advance</th>
             <th>Actions</th>
-                       
+
             {isExpanded && (
               <>
-              
-              <th>Phone Number</th>
-              <th>Date Of Joining</th>
-              <th>Notes</th>
+
+                <th>Phone Number</th>
+                <th>Date Of Joining</th>
+                <th>Notes</th>
               </>
             )}
           </tr>
@@ -216,26 +216,25 @@ const Employees = () => {
               <td>{item.address}</td>
               <td>{item.aadhar_number}</td>
               <td>
-              <div>Salary: Rs {item.salary}</div>
-              <div>Advance: Rs {item.advance}</div>
-            </td>
-
-                  <td>
-                    <Button variant="warning" onClick={() => handleShow(item)}>
-                      Edit
-                    </Button>{' '}
-                    <Button variant="danger" onClick={() => handleDeleteEmployee(item.employee_id)}>
-                      Delete
-                    </Button>{' '}
-                    <Button variant="info" onClick={() => handleViewSalary(item)}>
-                      View Salary
-                    </Button>
-                  </td>
+                <div>Salary: Rs {item.salary}</div>
+                <div>Advance: Rs {item.advance}</div>
+              </td>
+              <td>
+                <Button variant="warning" onClick={() => handleShow(item)}>
+                  Edit
+                </Button>{' '}
+                <Button variant="danger" onClick={() => handleDeleteEmployee(item.employee_id)}>
+                  Delete
+                </Button>{' '}
+                <Button variant="info" onClick={() => handleViewSalary(item)}>
+                  View Salary
+                </Button>
+              </td>
               {isExpanded && (
                 <>
-                <td>{item.phone_number}</td>
-                <td>{item.date_of_joining.split('T')[0]}</td>
-                <td>{item.notes}</td>
+                  <td>{item.phone_number}</td>
+                  <td>{item.date_of_joining.split('T')[0]}</td>
+                  <td>{item.notes}</td>
                 </>
               )}
             </tr>
@@ -249,7 +248,7 @@ const Employees = () => {
           <Modal.Title>{viewSalaryEmployee.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form.Group controlId="formMonth" style={{marginBottom : '20px'}}>
+          <Form.Group controlId="formMonth" style={{ marginBottom: '20px' }}>
             <Form.Label>Enter Month</Form.Label>
             <Form.Control
               type="text"
@@ -259,10 +258,10 @@ const Employees = () => {
             />
           </Form.Group>
 
-          <Form.Group controlId = "formYear">
+          <Form.Group controlId="formYear">
             <Form.Control
-              type = "text"
-              placeholder= "YYYY"
+              type="text"
+              placeholder="YYYY"
               value={salaryYear}
               onChange={(e) => setSalaryYear(e.target.value)}
             />
@@ -320,15 +319,18 @@ const Employees = () => {
             <Form.Group controlId="formGender">
               <Form.Label>Gender</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="Enter employee gender"
+                as="select"
                 value={editemployee ? editemployee.gender : newemployee.gender}
                 onChange={(e) =>
                   editemployee
                     ? setEditemployee({ ...editemployee, gender: e.target.value })
                     : setNewEmployee({ ...newemployee, gender: e.target.value })
                 }
-              />
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </Form.Control>
             </Form.Group>
             <Form.Group controlId="formPhone">
               <Form.Label>Phone Number</Form.Label>
@@ -357,7 +359,7 @@ const Employees = () => {
               />
 
             </Form.Group>
-              <Form.Group controlId="formDOJ">
+            <Form.Group controlId="formDOJ">
               <Form.Label>Address</Form.Label>
               <Form.Control
                 type="text"
@@ -370,8 +372,8 @@ const Employees = () => {
                 }
               />
 
-              </Form.Group>
-              <Form.Group controlId="formDOJ">
+            </Form.Group>
+            <Form.Group controlId="formDOJ">
               <Form.Label>Aadhar_number(12 Digit)</Form.Label>
               <Form.Control
                 type="number"
@@ -382,7 +384,7 @@ const Employees = () => {
                     ? setEditemployee({ ...editemployee, aadhar_number: e.target.value })
                     : setNewEmployee({ ...newemployee, aadhar_number: e.target.value })
                 }
-              />  
+              />
 
 
 
