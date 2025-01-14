@@ -60,9 +60,13 @@ A comprehensive **Employee Management System** built with a **React.js** fronten
    DB_PASSWORD=yourpassword
    DB_NAME=employeedb
    ```
-   - Running the backend server
+   - Running the backend server after adding dev script in package.json file
    ```bash
    npm run dev
+   ```
+   - Running without the dev script in package.json file
+   ```bash
+   node app.js
    ```
 
 3. Frontend Setup
@@ -81,7 +85,7 @@ A comprehensive **Employee Management System** built with a **React.js** fronten
    };
    export default CONFIG;
    ```
-   - Running the backend server
+   - Running the frontend server after adding the dev script in package.json file
    ```bash
    npm run dev
    ```
