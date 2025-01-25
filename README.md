@@ -46,39 +46,57 @@ A comprehensive **Employee Management System** built with a **React.js** fronten
    
 2. Backend Setup
    - Navigate to backend folder
+     
    ```bash
    cd backend
    ```
+   
    - Install dependencies
+     
    ```bash
    npm install
    ```
+   
    - Configure the database connection: Update the credentials in the .env file
+     
    ```bash
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=yourpassword
-   DB_NAME=employeedb
+   DB_HOST=<localhost>
+   DB_USER=<root>
+   DB_PASSWORD=<yourpassword>
+   DB_NAME=<employeedb>
    ```
-   - Running the backend server after adding dev script in package.json file
+   
+   - Running the backend server after using a custom script (optional)
+     
+    1. Add the dev script under scripts in package.json file
+       
+   ```
+   {"dev": "node app.js"}
+   ```
+   2. Run the script using the following command
+      
    ```bash
    npm run dev
    ```
-   - Running without the dev script in package.json file
+   - Running without the dev script in package.json file (Directly running it)
+     
    ```bash
    node app.js
    ```
 
 3. Frontend Setup
    - Navigate to frontend folder
+   
    ```bash
    cd frontend
    ```
    - Install dependencies
+     
    ```bash
    npm install
    ```
    - Configure the backend API URL in the config.js file:
+     
    ```bash
    const CONFIG = {
     BACKEND_URL: <Enter your backend URL here>
@@ -86,6 +104,7 @@ A comprehensive **Employee Management System** built with a **React.js** fronten
    export default CONFIG;
    ```
    - Running the frontend server after adding the dev script in package.json file
+     
    ```bash
    npm run dev
    ```
